@@ -2950,7 +2950,9 @@ div:has(> #login-form) {
     padding: 0.65rem 0.5rem 4rem 0.5rem !important;
   }
 
-  p, span:not(.whitespace-nowrap):not(.alert-dismiss-btn):not(.status-pill):not(.status-badge), div:not(.whitespace-nowrap) {
+  p:not(table *), 
+  span:not(.whitespace-nowrap):not(.alert-dismiss-btn):not(.status-pill):not(.status-badge):not([class*="status-"]):not([class*="badge-"]):not(table *), 
+  div:not(.whitespace-nowrap):not(table *):not(.table-wrapper):not(.overflow-x-auto) {
     word-break: break-word;
     overflow-wrap: break-word;
   }
@@ -2969,15 +2971,65 @@ div:has(> #login-form) {
   overflow-wrap: normal !important;
 }
 
-.table-wrapper table th,
-.table-wrapper table td {
-  word-break: normal !important;
-  overflow-wrap: normal !important;
+/* Table Horizontal Scrolling & Layout Container */
+.table-wrapper,
+.overflow-x-auto,
+div:has(> table) {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
+  position: relative !important;
 }
 
-.table-wrapper table th {
+/* Ensure all tables maintain comfortable min-width on mobile so cells never squeeze character-by-character */
+@media (max-width: 768px) {
+  .table-wrapper table,
+  .overflow-x-auto table,
+  table {
+    min-width: 500px;
+  }
+}
+
+/* Table Cells Formatting & Word Wrap Protections */
+table th,
+table td,
+table th *,
+table td *,
+.table-wrapper table th,
+.table-wrapper table td,
+.overflow-x-auto table th,
+.overflow-x-auto table td {
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  vertical-align: middle;
+}
+
+table th,
+.table-wrapper table th,
+.overflow-x-auto table th {
   white-space: nowrap !important;
 }
+
+/* Specific elements inside tables that must stay intact on one line */
+table td .status-pill,
+table td .status-badge,
+table td .status-badge-green,
+table td .status-verified,
+table td .status-pending,
+table td .font-mono,
+table td.font-mono,
+table td .whitespace-nowrap,
+table td.whitespace-nowrap,
+table td span[class*="status-"],
+table td span[class*="badge-"] {
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  display: inline-block;
+}
+
 
 
 

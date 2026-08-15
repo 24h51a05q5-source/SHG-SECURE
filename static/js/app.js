@@ -2090,11 +2090,12 @@ function renderMemberDashboardHTML() {
         
         return `
             <tr class="hover:bg-slate-50/50 transition border-b border-slate-100">
-                <td class="px-3 py-2 text-xs font-medium text-[#18233A]">${m.full_name}</td>
+                <td class="px-3 py-2 text-xs font-medium text-[#18233A] whitespace-normal min-w-[130px]">${m.full_name}</td>
                 <td class="px-3 py-2 text-[10px] font-mono text-[#5B6472] whitespace-nowrap font-bold">SHG001-M${(idx + 1).toString().padStart(2, '0')}</td>
-                <td class="px-3 py-2">
+                <td class="px-3 py-2 text-xs font-bold text-[#18233A] whitespace-nowrap">₹${m.amount ? m.amount.toLocaleString('en-IN') : '1,000'}</td>
+                <td class="px-3 py-2 whitespace-nowrap">
                     <span class="status-pill text-[9px] px-1.5 py-0.5 rounded-full whitespace-nowrap ${isPaid ? 'status-verified' : 'status-pending'}">
-                        ${isPaid ? '✓ PAID' : 'PEND'}
+                        ${isPaid ? '✓ PAID' : '⏰ PENDING'}
                     </span>
                 </td>
                 <td class="px-3 py-2 text-xs font-mono whitespace-nowrap ${dateClass}">${dateText}</td>
@@ -2217,16 +2218,16 @@ function renderMemberDashboardHTML() {
                             <h3 class="font-extrabold text-xs text-slate-800 tracking-wider uppercase">📊 Recent Ledger Transactions</h3>
                             <button onclick="appState.activeTab = 'transactions'; renderApp();" class="text-[9px] font-extrabold text-[#E87545] uppercase hover:underline">Full Passbook →</button>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
+                        <div class="table-wrapper overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[520px]">
                                 <thead>
                                     <tr class="bg-slate-50 text-[9px] font-black text-slate-400 uppercase border-b border-slate-200">
-                                        <th class="px-3 py-2">Date</th>
-                                        <th class="px-3 py-2">Txn ID</th>
-                                        <th class="px-3 py-2">Type</th>
-                                        <th class="px-3 py-2">Amount</th>
-                                        <th class="px-3 py-2">Status</th>
-                                        <th class="px-3 py-2">Risk</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Date</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Txn ID</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Type</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Amount</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Status</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Risk</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -2244,14 +2245,15 @@ function renderMemberDashboardHTML() {
                             <h3 class="font-extrabold text-xs text-slate-800 tracking-wider uppercase">👥 Group Member Dues</h3>
                             <button onclick="appState.activeTab = 'shg'; renderApp();" class="text-[9px] font-extrabold text-[#E87545] uppercase hover:underline">View Directory →</button>
                         </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
+                        <div class="table-wrapper overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[500px]">
                                 <thead>
                                     <tr class="bg-slate-50 text-[9px] font-black text-slate-400 uppercase border-b border-slate-200">
-                                        <th class="px-3 py-2">Member Name</th>
-                                        <th class="px-3 py-2">Member ID</th>
-                                        <th class="px-3 py-2">Status</th>
-                                        <th class="px-3 py-2">Date</th>
+                                        <th class="px-3 py-2 whitespace-nowrap min-w-[130px]">Member Name</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Member ID</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Amount</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Status</th>
+                                        <th class="px-3 py-2 whitespace-nowrap">Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -2282,16 +2284,16 @@ function renderLeaderDashboardHTML() {
         const isPaid = m.status === 'VERIFIED';
         return `
             <tr class="hover:bg-slate-50/50 transition">
-                <td class="px-4 py-3 text-xs font-bold text-slate-800">${m.full_name}</td>
-                <td class="px-4 py-3 text-[10px] font-mono text-slate-500">${m.username === 'sujatha' ? 'SHG001-M03' : 'SHG001-M' + (appState.members.indexOf(m) + 1).toString().padStart(2, '0')}</td>
-                <td class="px-4 py-3 text-xs font-semibold text-slate-700">₹${m.amount ? m.amount.toLocaleString('en-IN') : '1,000'}</td>
-                <td class="px-4 py-3">
-                    <span class="status-pill ${isPaid ? 'status-verified' : 'status-pending'}">
+                <td class="px-4 py-3 text-xs font-bold text-slate-800 whitespace-normal min-w-[130px]">${m.full_name}</td>
+                <td class="px-4 py-3 text-[10px] font-mono text-slate-500 whitespace-nowrap">${m.username === 'sujatha' ? 'SHG001-M03' : 'SHG001-M' + (appState.members.indexOf(m) + 1).toString().padStart(2, '0')}</td>
+                <td class="px-4 py-3 text-xs font-semibold text-slate-700 whitespace-nowrap">₹${m.amount ? m.amount.toLocaleString('en-IN') : '1,000'}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="status-pill ${isPaid ? 'status-verified' : 'status-pending'} whitespace-nowrap">
                         ${isPaid ? '✓ PAID' : '⏰ PENDING'}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-xs text-slate-500">${m.payment_date || '-'}</td>
-                <td class="px-4 py-3 font-mono text-[10px]">${m.txn_id ? `<span class="bg-slate-100 px-1 rounded">${m.txn_id}</span>` : '-'}</td>
+                <td class="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">${m.payment_date || '-'}</td>
+                <td class="px-4 py-3 font-mono text-[10px] whitespace-nowrap">${m.txn_id ? `<span class="bg-slate-100 px-1 rounded">${m.txn_id}</span>` : '-'}</td>
             </tr>
         `;
     }).join('');
@@ -2314,15 +2316,15 @@ function renderLeaderDashboardHTML() {
             <div class="space-y-3">
                 <h3 class="font-bold text-sm text-slate-800 tracking-wider uppercase">Member Contribution Board</h3>
                 <div class="table-wrapper overflow-x-auto border border-slate-150 rounded-xl bg-white shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse min-w-[560px]">
                         <thead>
                             <tr class="bg-slate-50 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-150">
-                                <th class="px-4 py-2.5">Member Name</th>
-                                <th class="px-4 py-2.5">ID Code</th>
-                                <th class="px-4 py-2.5">Amount</th>
-                                <th class="px-4 py-2.5">Status</th>
-                                <th class="px-4 py-2.5">Date</th>
-                                <th class="px-4 py-2.5">Transaction Ref</th>
+                                <th class="px-4 py-2.5 whitespace-nowrap min-w-[130px]">Member Name</th>
+                                <th class="px-4 py-2.5 whitespace-nowrap">ID Code</th>
+                                <th class="px-4 py-2.5 whitespace-nowrap">Amount</th>
+                                <th class="px-4 py-2.5 whitespace-nowrap">Status</th>
+                                <th class="px-4 py-2.5 whitespace-nowrap">Date</th>
+                                <th class="px-4 py-2.5 whitespace-nowrap">Transaction Ref</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -2521,13 +2523,13 @@ function renderPassbookHTML() {
 
         return `
             <tr class="hover:bg-slate-50 transition border-b last:border-0 border-slate-100">
-                <td class="px-4 py-3 text-xs font-semibold text-slate-500">${t.date}</td>
-                <td class="px-4 py-3 text-xs font-bold text-slate-800">${t.description}</td>
-                <td class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase">${t.category}</td>
-                <td class="px-4 py-3 text-xs font-extrabold ${t.isCredit ? 'text-emerald-700' : 'text-red-600'}">
+                <td class="px-4 py-3 text-xs font-semibold text-slate-500 whitespace-nowrap">${t.date}</td>
+                <td class="px-4 py-3 text-xs font-bold text-slate-800 whitespace-normal min-w-[140px]">${t.description}</td>
+                <td class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase whitespace-nowrap">${t.category}</td>
+                <td class="px-4 py-3 text-xs font-extrabold whitespace-nowrap ${t.isCredit ? 'text-emerald-700' : 'text-red-600'}">
                     ${t.isCredit ? '+' : '-'} ₹${t.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
                 </td>
-                <td class="px-4 py-3 text-right">${statusBadge}</td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">${statusBadge}</td>
             </tr>
         `;
     }).join('');
@@ -2545,14 +2547,14 @@ function renderPassbookHTML() {
             </div>
             
             <div class="table-wrapper overflow-x-auto rounded-xl border border-slate-150 bg-white">
-                <table class="w-full text-left border-collapse" id="passbook-table">
+                <table class="w-full text-left border-collapse min-w-[540px]" id="passbook-table">
                     <thead>
                         <tr class="bg-slate-50 text-[10px] font-extrabold text-slate-400 uppercase border-b">
-                            <th class="px-4 py-2.5">Date</th>
-                            <th class="px-4 py-2.5">Description</th>
-                            <th class="px-4 py-2.5">Category</th>
-                            <th class="px-4 py-2.5">Amount</th>
-                            <th class="px-4 py-2.5 text-right">Verification</th>
+                            <th class="px-4 py-2.5 whitespace-nowrap">Date</th>
+                            <th class="px-4 py-2.5 whitespace-nowrap min-w-[140px]">Description</th>
+                            <th class="px-4 py-2.5 whitespace-nowrap">Category</th>
+                            <th class="px-4 py-2.5 whitespace-nowrap">Amount</th>
+                            <th class="px-4 py-2.5 text-right whitespace-nowrap">Verification</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -4030,10 +4032,10 @@ function renderMySHGViewHTML() {
         const memberId = getMemberIdForUser(m.username);
         return `
             <tr class="hover:bg-slate-50 transition border-b border-[#E4E0D7]">
-                <td class="px-4 py-3 text-sm font-medium text-[#18233A]">${m.full_name}</td>
-                <td class="px-4 py-3 text-xs font-mono text-[#5B6472] font-bold">${memberId}</td>
-                <td class="px-4 py-3 text-sm font-bold text-[#18233A]">₹1,000</td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-3 text-sm font-medium text-[#18233A] whitespace-normal min-w-[130px]">${m.full_name}</td>
+                <td class="px-4 py-3 text-xs font-mono text-[#5B6472] font-bold whitespace-nowrap">${memberId}</td>
+                <td class="px-4 py-3 text-sm font-bold text-[#18233A] whitespace-nowrap">₹1,000</td>
+                <td class="px-4 py-3 whitespace-nowrap">
                     <span class="status-pill text-[9px] px-2 py-0.5 rounded-full whitespace-nowrap ${isPaid ? 'status-verified' : 'status-pending'}">
                         ${isPaid ? '✓ PAID' : 'PEND'}
                     </span>
@@ -4115,14 +4117,14 @@ function renderMySHGViewHTML() {
             <!-- 4. MEMBER PAYMENT STATUS -->
             <div class="space-y-3 pt-4 border-t border-slate-100">
                 <h3 class="font-extrabold text-sm text-[#172033] uppercase tracking-wider">Member Payment Status</h3>
-                <div class="overflow-x-auto border border-[#D9E1EC] rounded-xl bg-white shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                <div class="table-wrapper overflow-x-auto border border-[#D9E1EC] rounded-xl bg-white shadow-sm">
+                    <table class="w-full text-left border-collapse min-w-[480px]">
                         <thead>
                             <tr class="bg-[#EEF2FF] text-xs font-bold text-[#172033] uppercase border-b border-[#D9E1EC]">
-                                <th class="px-4 py-3">Member Name</th>
-                                <th class="px-4 py-3">Member ID</th>
-                                <th class="px-4 py-3">Expected</th>
-                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3 whitespace-nowrap min-w-[130px]">Member Name</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Member ID</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Expected</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -4156,11 +4158,11 @@ function renderMyFinancesViewHTML() {
 
     const paymentRowsHTML = payments.map(p => `
         <tr class="hover:bg-[#F5F3FF] transition border-b border-[#D9E1EC]">
-            <td class="px-4 py-3 text-sm font-bold text-[#172033]">${p.date}</td>
-            <td class="px-4 py-3 text-xs font-mono text-[#52627A]">${p.id}</td>
-            <td class="px-4 py-3 text-sm font-bold text-[#172033]">${p.amount}</td>
-            <td class="px-4 py-3">
-                <span class="status-badge-green">${p.status}</span>
+            <td class="px-4 py-3 text-sm font-bold text-[#172033] whitespace-nowrap">${p.date}</td>
+            <td class="px-4 py-3 text-xs font-mono text-[#52627A] whitespace-nowrap font-bold">${p.id}</td>
+            <td class="px-4 py-3 text-sm font-bold text-[#172033] whitespace-nowrap">${p.amount}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+                <span class="status-badge-green whitespace-nowrap">${p.status}</span>
             </td>
         </tr>
     `).join('');
@@ -4243,14 +4245,14 @@ function renderMyFinancesViewHTML() {
                         View All Transactions &rarr;
                     </button>
                 </div>
-                <div class="overflow-x-auto rounded-xl shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                <div class="table-wrapper overflow-x-auto rounded-xl shadow-sm">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-900 text-xs font-bold uppercase border-b border-slate-200 dark:border-slate-800">
-                                <th class="px-4 py-3">Date</th>
-                                <th class="px-4 py-3">Transaction ID</th>
-                                <th class="px-4 py-3">Amount</th>
-                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Date</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Transaction ID</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Amount</th>
+                                <th class="px-4 py-3 whitespace-nowrap">Status</th>
                             </tr>
                         </thead>
                         <tbody>

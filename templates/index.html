@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHG-Secure – Smart Cashless Financial Protection Platform for Self-Help Groups</title>
+    <meta name="description" content="Empowering Self-Help Groups (SHGs) through cashless digital payments, automated bank reconciliation, loan transparency, and active member protection.">
+    
+    <!-- Theme Pre-Initialization to prevent flicker on refresh -->
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('shg-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: 'var(--surface-secondary)',
+                            100: 'var(--success-border)',
+                            800: 'var(--primary)',
+                            900: 'var(--primary-dark)',
+                            950: 'var(--text-primary)',
+                        },
+                        slate: {
+                            300: 'var(--border)',
+                            400: 'var(--text-light-muted)',
+                            500: 'var(--text-muted)',
+                            600: 'var(--text-muted)',
+                            700: 'var(--text-secondary)',
+                            800: 'var(--text-primary)',
+                            900: 'var(--text-primary)',
+                            950: 'var(--text-primary)'
+                        },
+                        gray: {
+                            300: 'var(--border)',
+                            400: 'var(--text-light-muted)',
+                            500: 'var(--text-muted)',
+                            600: 'var(--text-muted)',
+                            700: 'var(--text-secondary)',
+                            800: 'var(--text-primary)',
+                            900: 'var(--text-primary)',
+                            950: 'var(--text-primary)'
+                        },
+                        amber: {
+                            700: 'var(--warning)',
+                            800: 'var(--warning)',
+                            900: 'var(--warning-text)'
+                        },
+                        red: {
+                            700: 'var(--danger)',
+                            800: 'var(--danger)',
+                            900: 'var(--danger-text)'
+                        },
+                        blue: {
+                            700: 'var(--primary)',
+                            800: 'var(--primary)',
+                            900: 'var(--primary-dark)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom stylesheet for premium animations & themes -->
+    <link rel="stylesheet" href="/static/css/style.css?v=32.0">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Global Loading State Indicator -->
+    <div id="global-loader" class="fixed top-0 left-0 right-0 h-1.5 bg-emerald-800 animate-pulse z-50 hidden"></div>
+
+    <!-- Header Navigation -->
+    <header id="app-header" class="border-b sticky top-0 z-40 shadow-sm">
+        <!-- Rendered dynamically by static/js/app.js -->
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        <!-- Dashboard Workspace Page -->
+        <section id="dashboard-section">
+            <!-- Rendered dynamically by static/js/app.js -->
+        </section>
+    </main>
+
+
+
+    <!-- ========================================== -->
+    <!-- MODALS CONTAINER                           -->
+    <!-- ========================================== -->
+
+    <!-- Modal 1: Simulated Payment Gateway -->
+    <div id="payment-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="bg-[#18233A] p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-extrabold text-base tracking-tight">Simulated Cashless Payment</h3>
+                    <button onclick="closePaymentModal();" class="text-white/70 hover:text-white font-bold text-sm">✕</button>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">Directly Transferring to Mahila Jyothi SHG Account</p>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <!-- Header with Info -->
+                <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-center">
+                    <span class="text-xs text-slate-500 font-bold uppercase block mb-1">Monthly SHG Contribution</span>
+                    <span class="text-3xl font-black text-[#18233A] mt-1">₹1,000</span>
+                    <span class="text-xs text-slate-700 font-bold block mt-1">Mahila Jyothi SHG (SHG001)</span>
+                    <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">Destination: Registered SHG Bank Account</span>
+                    <span class="text-[10px] text-red-650 font-extrabold block mt-2 animate-pulse">DEMO PAYMENT — NO REAL MONEY TRANSFERRED</span>
+                </div>
+                
+                <div class="space-y-3">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Choose Payment Method</span>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- UPI Select Card -->
+                        <button id="pay-method-upi" onclick="selectPaymentMethod('UPI');" class="flex flex-col items-center justify-center p-4 border border-[#E87545] bg-[#FFF3EB] rounded-xl transition text-center group">
+                            <span class="text-2xl mb-1">📱</span>
+                            <span class="font-extrabold text-xs text-slate-800">UPI</span>
+                        </button>
+                        
+                        <!-- Bank Transfer Select Card -->
+                        <button id="pay-method-bank" onclick="selectPaymentMethod('BANK_TRANSFER');" class="flex flex-col items-center justify-center p-4 border border-slate-200 hover:border-[#E87545] rounded-xl transition text-center group">
+                            <span class="text-2xl mb-1">🏦</span>
+                            <span class="font-extrabold text-xs text-slate-800">Bank Transfer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Primary button to process simulated payment -->
+                <button id="pay-primary-btn" onclick="executeSimulatedPayment();" class="w-full bg-[#E87545] hover:bg-[#D66434] text-white font-extrabold text-sm py-3.5 rounded-xl transition shadow-md">
+                    PAY ₹1,000
+                </button>
+            </div>
+            
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 text-center">
+                <button onclick="closePaymentModal();" class="text-xs font-bold text-slate-500 hover:text-slate-700">Cancel Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Verified Digital Receipt -->
+    <div id="receipt-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="p-6">
+                <!-- Receipt Paper Mockup -->
+                <div id="receipt-content" class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <!-- Injected dynamically by static/js/app.js -->
+                </div>
+                
+                <div class="mt-6 flex flex-col gap-2">
+                    <button id="download-receipt-btn" class="w-full btn-primary-custom font-bold text-xs py-3 rounded-lg shadow-sm">
+                        💾 Download Receipt PDF
+                    </button>
+                    <button onclick="closeReceiptModal();" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg transition">
+                        Close Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Leader Log Expense Form -->
+    <div id="expense-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="bg-[#18233A] p-5 text-white">
+                <h3 class="font-extrabold text-base tracking-tight">Log Group Expense Record</h3>
+                <p class="text-xs text-slate-300 mt-1">Requires all member visibility and ledger transparency</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Expense Amount (₹)</label>
+                    <input type="number" id="expense-amount" placeholder="e.g. 15000" class="w-full bg-white border border-slate-200 font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-[#E87545]" />
+                    <p class="text-[9px] text-slate-400 mt-1">* Note: Expenses exceeding ₹50,000 automatically trigger risk flags and require member votes.</p>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Expense Purpose & Description</label>
+                    <input type="text" id="expense-purpose" placeholder="e.g. Purchase of organic seeds for farm setup" class="w-full bg-white border border-slate-200 font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-[#E87545]" />
+                </div>
+                
+                <!-- Quick Demo Scenario Filler buttons -->
+                <div class="bg-slate-50 p-3 rounded-lg border">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Evaluation Presets:</span>
+                    <div class="flex gap-2 mt-1.5">
+                        <button onclick="document.getElementById('expense-amount').value = '12000'; document.getElementById('expense-purpose').value = 'Farm equipment repairs';" class="bg-white hover:bg-slate-100 text-slate-600 border px-2 py-1 rounded text-[9px] font-bold">Normal (₹12k)</button>
+                        <button onclick="document.getElementById('expense-amount').value = '150000'; document.getElementById('expense-purpose').value = 'Dairy equipment and feed supplies';" class="bg-white hover:bg-slate-100 text-slate-600 border px-2 py-1 rounded text-[9px] font-bold text-red-700 border-red-200">High-Risk Anomaly (₹1.5L)</button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeExpenseModal();" class="text-xs font-bold text-slate-500 hover:text-slate-700 px-3 py-2">Cancel</button>
+                <button onclick="submitExpense();" class="btn-primary-custom font-bold text-xs px-4 py-2 rounded-lg shadow-sm">Save Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Dispute/Concern Form -->
+    <div id="dispute-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="bg-[#C62828] p-5 text-white">
+                <h3 class="font-extrabold text-base tracking-tight">⚠️ Dispute Financial Record</h3>
+                <p class="text-xs text-red-100 mt-1">This flags the transaction as contested and alert reviews.</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="dispute-tx-type" />
+                <input type="hidden" id="dispute-tx-id" />
+                
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">State your Concern or Objection</label>
+                    <textarea id="dispute-reason" rows="3" placeholder="Explain why you are disputing this transaction..." class="w-full bg-white border border-slate-200 font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-[#C62828]" required></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeDisputeModal();" class="text-xs font-bold text-slate-500 hover:text-slate-700 px-3 py-2">Cancel</button>
+                <button onclick="submitGeneralDispute();" class="bg-[#C62828] hover:bg-[#B71C1C] text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm">Raise Concern</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- Core client logic imports -->
+    <script src="/static/js/app.js?v=32.0"></script>
+</body>
+</html>

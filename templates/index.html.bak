@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHG-Secure – Smart Cashless Financial Protection Platform for Self-Help Groups</title>
+    <meta name="description" content="Empowering Self-Help Groups (SHGs) through cashless digital payments, automated bank reconciliation, loan transparency, and active member protection.">
+    
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#f0fdf4',
+                            100: '#d1e7dd',
+                            800: '#15803D', // Dark green success
+                            900: '#0f5132',
+                            950: '#172033', // Primary dark text
+                        },
+                        slate: {
+                            300: '#94a3b8',
+                            400: '#475569', // Medium-dark gray secondary
+                            500: '#475569', // Medium-dark gray secondary
+                            600: '#475569', // Medium-dark gray secondary
+                            700: '#334155',
+                            800: '#172033', // Dark professional navy primary text
+                            900: '#172033',
+                            950: '#172033'
+                        },
+                        gray: {
+                            300: '#94a3b8',
+                            400: '#475569',
+                            500: '#475569',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#172033',
+                            900: '#172033',
+                            950: '#172033'
+                        },
+                        amber: {
+                            700: '#B45309', // Dark amber warning
+                            800: '#B45309',
+                            900: '#B45309'
+                        },
+                        red: {
+                            700: '#B91C1C', // Dark red urgent
+                            800: '#B91C1C',
+                            900: '#B91C1C'
+                        },
+                        blue: {
+                            700: '#1D4ED8', // Professional blue info
+                            800: '#1D4ED8',
+                            900: '#1D4ED8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom stylesheet for premium animations & glassmorphism -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- Global Loading State Indicator -->
+    <div id="global-loader" class="fixed top-0 left-0 right-0 h-1.5 bg-emerald-800 animate-pulse z-50 hidden"></div>
+
+    <!-- Header Navigation -->
+    <header id="app-header" class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-sm">
+        <!-- Rendered dynamically by static/js/app.js -->
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        <!-- 1. Landing / Introduction Page -->
+        <section id="landing-section" class="hidden">
+            <!-- Rendered dynamically by static/js/app.js -->
+        </section>
+
+        <!-- 2. Dashboard Workspace Page -->
+        <section id="dashboard-section" class="hidden">
+            <!-- Rendered dynamically by static/js/app.js -->
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 mt-12 text-center text-xs">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-extrabold text-slate-300">SHG-Secure FinTech Platform</p>
+            <p>PAY &bull; VERIFY &bull; TRACK &bull; ALERT &bull; PROTECT</p>
+            <p class="text-[10px] text-slate-500 mt-1">Smart Cashless Financial Protection & Transparency Platform. Designed for Youth Ideathon Competition Showcase.</p>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- MODALS CONTAINER                           -->
+    <!-- ========================================== -->
+
+    <!-- Modal 1: Simulated Payment Gateway -->
+    <div id="payment-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="bg-emerald-800 p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-extrabold text-base tracking-tight">Simulated Cashless Payment</h3>
+                    <button onclick="closePaymentModal();" class="text-white/70 hover:text-white font-bold text-sm">✕</button>
+                </div>
+                <p class="text-xs text-emerald-100/80 mt-1">Directly Transferring to Mahila Jyothi SHG Account</p>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <!-- Header with Info -->
+                <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-center">
+                    <span class="text-xs text-slate-500 font-bold uppercase block mb-1">Monthly SHG Contribution</span>
+                    <span class="text-3xl font-black text-emerald-800 mt-1">₹1,000</span>
+                    <span class="text-xs text-slate-700 font-bold block mt-1">Mahila Jyothi SHG (SHG001)</span>
+                    <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">Destination: Registered SHG Bank Account</span>
+                    <span class="text-[10px] text-red-650 font-extrabold block mt-2 animate-pulse">DEMO PAYMENT — NO REAL MONEY TRANSFERRED</span>
+                </div>
+                
+                <div class="space-y-3">
+                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Choose Payment Method</span>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- UPI Select Card -->
+                        <button id="pay-method-upi" onclick="selectPaymentMethod('UPI');" class="flex flex-col items-center justify-center p-4 border border-emerald-600 bg-emerald-50/30 rounded-xl transition text-center group">
+                            <span class="text-2xl mb-1">📱</span>
+                            <span class="font-extrabold text-xs text-slate-800">UPI</span>
+                        </button>
+                        
+                        <!-- Bank Transfer Select Card -->
+                        <button id="pay-method-bank" onclick="selectPaymentMethod('BANK_TRANSFER');" class="flex flex-col items-center justify-center p-4 border border-slate-200 hover:border-emerald-600 rounded-xl transition text-center group">
+                            <span class="text-2xl mb-1">🏦</span>
+                            <span class="font-extrabold text-xs text-slate-800">Bank Transfer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Primary button to process simulated payment -->
+                <button id="pay-primary-btn" onclick="executeSimulatedPayment();" class="w-full bg-emerald-800 hover:bg-emerald-950 text-white font-extrabold text-sm py-3.5 rounded-xl transition shadow-md">
+                    PAY ₹1,000
+                </button>
+            </div>
+            
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 text-center">
+                <button onclick="closePaymentModal();" class="text-xs font-bold text-slate-500 hover:text-slate-700">Cancel Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Verified Digital Receipt -->
+    <div id="receipt-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="p-6">
+                <!-- Receipt Paper Mockup -->
+                <div id="receipt-content" class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <!-- Injected dynamically by static/js/app.js -->
+                </div>
+                
+                <div class="mt-6 flex flex-col gap-2">
+                    <button id="download-receipt-btn" class="w-full btn-primary-custom font-bold text-xs py-3 rounded-lg shadow-sm">
+                        💾 Download Receipt PDF
+                    </button>
+                    <button onclick="closeReceiptModal();" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg transition">
+                        Close Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Leader Log Expense Form -->
+    <div id="expense-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="bg-emerald-800 p-5 text-white">
+                <h3 class="font-extrabold text-base tracking-tight">Log Group Expense Record</h3>
+                <p class="text-xs text-emerald-100/80 mt-1">Requires all member visibility and ledger transparency</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Expense Amount (₹)</label>
+                    <input type="number" id="expense-amount" placeholder="e.g. 15000" class="w-full bg-white border border-slate-200 font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-emerald-800" />
+                    <p class="text-[9px] text-slate-400 mt-1">* Note: Expenses exceeding ₹50,000 automatically trigger risk flags and require member votes.</p>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Expense Purpose & Description</label>
+                    <input type="text" id="expense-purpose" placeholder="e.g. Purchase of organic seeds for farm setup" class="w-full bg-white border border-slate-200 font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-emerald-800" />
+                </div>
+                
+                <!-- Quick Demo Scenario Filler buttons -->
+                <div class="bg-slate-50 p-3 rounded-lg border">
+                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Evaluation Presets:</span>
+                    <div class="flex gap-2 mt-1.5">
+                        <button onclick="document.getElementById('expense-amount').value = '12000'; document.getElementById('expense-purpose').value = 'Farm equipment repairs';" class="bg-white hover:bg-slate-100 text-slate-600 border px-2 py-1 rounded text-[9px] font-bold">Normal (₹12k)</button>
+                        <button onclick="document.getElementById('expense-amount').value = '150000'; document.getElementById('expense-purpose').value = 'Dairy equipment and feed supplies';" class="bg-white hover:bg-slate-100 text-slate-600 border px-2 py-1 rounded text-[9px] font-bold text-red-700 border-red-200">High-Risk Anomaly (₹1.5L)</button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeExpenseModal();" class="text-xs font-bold text-slate-500 hover:text-slate-700 px-3 py-2">Cancel</button>
+                <button onclick="submitExpense();" class="btn-primary-custom font-bold text-xs px-4 py-2 rounded-lg shadow-sm">Save Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Dispute/Concern Form -->
+    <div id="dispute-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 animate-fade-in-up">
+            <div class="bg-red-800 p-5 text-white">
+                <h3 class="font-extrabold text-base tracking-tight">⚠️ Dispute Financial Record</h3>
+                <p class="text-xs text-red-100/80 mt-1">This flags the transaction as contested and alert reviews.</p>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="dispute-tx-type" />
+                <input type="hidden" id="dispute-tx-id" />
+                
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">State your Concern or Objection</label>
+                    <textarea id="dispute-reason" rows="3" placeholder="Explain why you are disputing this transaction..." class="w-full bg-white border border-slate-200 font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-emerald-800" required></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeDisputeModal();" class="text-xs font-bold text-slate-500 hover:text-slate-700 px-3 py-2">Cancel</button>
+                <button onclick="submitGeneralDispute();" class="bg-red-700 hover:bg-red-800 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm">Raise Concern</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FLOATING INTERACTIVE DEMO CONTROLLER      -->
+    <!-- ========================================== -->
+    <div id="demo-controller-panel" class="fixed bottom-6 right-6 z-40 bg-slate-900 border border-slate-800 text-slate-100 rounded-2xl w-72 shadow-2xl overflow-hidden transition-all duration-300">
+        <!-- Panel Header -->
+        <div class="bg-slate-950 px-4 py-3 flex justify-between items-center cursor-pointer border-b border-slate-850" onclick="const p = document.getElementById('demo-controller-body'); p.classList.toggle('hidden');">
+            <div class="flex items-center gap-2">
+                <span class="text-emerald-500 text-xs">●</span>
+                <span class="font-extrabold text-xs uppercase tracking-wider text-slate-200">Competition Demo Mode</span>
+            </div>
+            <span class="text-slate-400 font-mono text-[10px]">&uarr;&darr; Expand</span>
+        </div>
+        
+        <!-- Panel Content -->
+        <div id="demo-controller-body" class="p-4 space-y-4 max-h-[380px] overflow-y-auto">
+            <div>
+                <p class="text-[10px] text-slate-400 font-medium">Select a scenario to reset and seed the database state for specific problems:</p>
+            </div>
+            
+            <div class="space-y-1.5">
+                <!-- Scenario A -->
+                <button data-scenario="A" class="scenario-btn w-full text-left p-2 border border-slate-700 rounded-lg text-xs font-semibold hover:border-slate-500 transition flex justify-between items-center">
+                    <span>A. Normal Payments (10/10)</span>
+                    <span class="text-[8px] bg-emerald-900 text-emerald-300 px-1 py-0.5 rounded font-bold uppercase">Green</span>
+                </button>
+                
+                <!-- Scenario B -->
+                <button data-scenario="B" class="scenario-btn w-full text-left p-2 border border-slate-700 rounded-lg text-xs font-semibold hover:border-slate-500 transition flex justify-between items-center">
+                    <span>B. 8 of 10 Paid Shortfall</span>
+                    <span class="text-[8px] bg-amber-900 text-amber-300 px-1 py-0.5 rounded font-bold uppercase">Risk</span>
+                </button>
+                
+                <!-- Scenario C -->
+                <button data-scenario="C" class="scenario-btn w-full text-left p-2 border border-slate-700 rounded-lg text-xs font-semibold hover:border-slate-500 transition flex justify-between items-center">
+                    <span>C. Leader Cash Mismatch</span>
+                    <span class="text-[8px] bg-red-900 text-red-300 px-1 py-0.5 rounded font-bold uppercase">Mismatch</span>
+                </button>
+                
+                <!-- Scenario D -->
+                <button data-scenario="D" class="scenario-btn w-full text-left p-2 border border-slate-700 rounded-lg text-xs font-semibold hover:border-slate-500 transition flex justify-between items-center">
+                    <span>D. Unauthorized Loan Review</span>
+                    <span class="text-[8px] bg-purple-900 text-purple-300 px-1 py-0.5 rounded font-bold uppercase">Review</span>
+                </button>
+                
+                <!-- Scenario E -->
+                <button data-scenario="E" class="scenario-btn w-full text-left p-2 border border-slate-700 rounded-lg text-xs font-semibold hover:border-slate-500 transition flex justify-between items-center">
+                    <span>E. Large Expense Anomaly</span>
+                    <span class="text-[8px] bg-amber-900 text-amber-300 px-1 py-0.5 rounded font-bold uppercase">Anomaly</span>
+                </button>
+                
+                <!-- Scenario F -->
+                <button data-scenario="F" class="scenario-btn w-full text-left p-2 border border-slate-700 rounded-lg text-xs font-semibold hover:border-slate-500 transition flex justify-between items-center">
+                    <span>F. Repayment Deadline tomorrow</span>
+                    <span class="text-[8px] bg-red-900 text-red-300 px-1 py-0.5 rounded font-bold uppercase">Critical</span>
+                </button>
+            </div>
+            
+            <div class="border-t border-slate-800 pt-3">
+                <button onclick="startGuidedDemo();" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold text-[10px] py-2 rounded-lg transition uppercase tracking-wider text-center">
+                    🚀 Run Guided Tour
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core client logic imports -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,2183 @@
+// SHG-Secure Front-End Application Logic
+
+let appState = {
+    currentUser: null,
+    scenario: 'A',
+    shg: null,
+    members: [],
+    loans: [],
+    expenses: [],
+    disputes: [],
+    alerts: [],
+    auditLogs: [],
+    reconciliation: {},
+    riskScore: {},
+    currentLanguage: 'en',
+    currentView: 'landing', // 'landing' or 'dashboard'
+    isLoading: false,
+    demoGuidedStep: 0,
+    demoGuidedActive: false
+};
+
+// Multilingual Dictionary for Financial Awareness Module
+const translations = {
+    en: {
+        title: "Financial Awareness Handbook",
+        subtitle: "Learn how SHG-Secure protects your hard-earned money",
+        langLabel: "Language",
+        q1: "What is an SHG Loan?",
+        a1: "It is a combined loan taken by the group from a bank. All members share equal responsibility for repayment. Visibility helps ensure everyone knows what loans are active.",
+        q2: "What is Outstanding Balance?",
+        a2: "It is the remaining amount that the SHG group collectively owes the bank. Keeping this visible prevents surprise debts.",
+        q3: "What is a Repayment Deadline?",
+        a3: "The specific date by which the monthly payment must reach the bank. Delayed payments lower the group's rating and increase interest rates.",
+        q4: "Why should you keep your Digital Receipt?",
+        a4: "A digital receipt is an independent, unchangeable proof of your payment. It prevents disputes like 'I already paid' and proves your transaction was sent directly to the bank account.",
+        q5: "What to do if you don't recognize a transaction?",
+        a5: "If a loan or withdrawal appears that was not discussed, click the 'Report / Dispute' button immediately. This flags the item for authorized bank review.",
+        q6: "What happens if a group payment is delayed?",
+        a6: "If even 1 or 2 members don't pay on time, the entire group faces a default. SHG-Secure detects this early so the group can coordinate before penalties apply.",
+        q7: "How to verify your payment status?",
+        a7: "Check your digital passbook on this dashboard. If it shows 'VERIFIED', the bank has recorded the fund receipt. If it shows 'PENDING', contact the leader immediately.",
+        badge: "Awareness Guide",
+        disclaimer: "Note: This is a decision-support learning guide, not bank advice."
+    },
+    te: {
+        title: "ఆర్థిక అవగాహన హ్యాండ్‌బుక్",
+        subtitle: "SHG-Secure మీ కష్టార్జితాన్ని ఎలా కాపాడుతుందో తెలుసుకోండి",
+        langLabel: "భాష",
+        q1: "SHG రుణం అంటే ఏమిటి?",
+        a1: "ఇది బ్యాంకు నుండి గ్రూప్ తీసుకున్న సంయుక్త రుణం. చెల్లింపుకు సభ్యులందరిదీ సమాన బాధ్యత. సభ్యులందరికీ ఏ రుణాలు ఉన్నాయో తెలియడానికి ఇది ఉపయోగపడుతుంది.",
+        q2: "బకాయి మొత్తం అంటే ఏమిటి?",
+        a2: "ఇది SHG గ్రూప్ బ్యాంకుకు చెల్లించాల్సిన మిగిలిన మొత్తం. బకాయిలు అందరికీ స్పష్టంగా కనిపించడం వల్ల ఆకస్మిక అప్పుల భయం ఉండదు.",
+        q3: "తిరిగి చెల్లింపు గడువు అంటే ఏమిటి?",
+        a3: "నెలవారీ కంతులు బ్యాంకుకు చేరాల్సిన నిర్దిష్ట తేదీ. ఆలస్యంగా చెల్లిస్తే గ్రూప్ రేటింగ్ తగ్గి, వడ్డీ రేట్లు పెరుగుతాయి.",
+        q4: "డిజిటల్ రసీదును ఎందుకు ఉంచుకోవాలి?",
+        a4: "డిజిటల్ రసీదు మీ చెల్లింపుకు తిరుగులేని సాక్ష్యం. 'నేను ఇప్పటికే చెల్లించాను' అనే వివాదాలను ఇది నివారిస్తుంది మరియు మీ డబ్బు బ్యాంకుకు చేరిందని రుజువు చేస్తుంది.",
+        q5: "గుర్తించని లావాదేవీని చూస్తే ఏం చేయాలి?",
+        a5: "గ్రూప్ సమావేశంలో చర్చించని రుణం లేదా ఉపసంహరణ కనిపిస్తే, వెంటనే 'రిపోర్ట్ / వివాదం' బటన్ నొక్కండి. ఇది సమీక్ష అధికారికి అలర్ట్ పంపుతుంది.",
+        q6: "గ్రూప్ చెల్లింపు ఆలస్యమైతే ఏమవుతుంది?",
+        a6: "ఒకరు లేదా ఇద్దరు సభ్యులు సకాలంలో చెల్లించకపోయినా, గ్రూప్ మొత్తం అపరాధిగా మారుతుంది. దీనిని ముందే గుర్తించి గ్రూప్ సర్దుబాటు చేసుకోవడానికి ఈ యాప్ సహాయపడుతుంది.",
+        q7: "చెల్లింపును ఎలా ధృవీకరించాలి?",
+        a7: "మీ డిజిటల్ పాస్‌బుక్ తనిఖీ చేయండి. 'VERIFIED' అని ఉంటే బ్యాంకుకు డబ్బులు చేరినట్టు. 'PENDING' అని ఉంటే వెంటనే లీడర్‌ను సంప్రదించండి.",
+        badge: "అవగాహన గైడ్",
+        disclaimer: "గమనిక: ఇది అవగాహన కొరకు మాత్రమే, బ్యాంకు అధికారిక సలహా కాదు."
+    },
+    hi: {
+        title: "वित्तीय जागरूकता पुस्तिका",
+        subtitle: "जानें कि SHG-Secure आपकी मेहनत की कमाई की रक्षा कैसे करता है",
+        langLabel: "भाषा",
+        q1: "एसएचजी (SHG) ऋण क्या है?",
+        a1: "यह बैंक से समूह द्वारा लिया गया एक संयुक्त ऋण है। पुनर्भुगतान के लिए सभी सदस्य समान रूप से जिम्मेदार हैं। पारदर्शिता से सभी को सक्रिय ऋणों की जानकारी रहती है।",
+        q2: "बकाया राशि (Outstanding Balance) क्या है?",
+        a2: "यह वह बची हुई राशि है जो SHG समूह को बैंक को चुकानी है। इसे पारदर्शी रखने से अचानक होने वाले कर्ज से बचाव होता है।",
+        q3: "पुनर्भुगतान की समय सीमा (Deadline) क्या है?",
+        a3: "वह तारीख जब तक मासिक भुगतान बैंक तक पहुंचना आवश्यक है। देरी से भुगतान करने पर समूह की रेटिंग गिरती है और ब्याज दर बढ़ती है।",
+        q4: "डिजिटल रसीद संभालकर क्यों रखनी चाहिए?",
+        a4: "डिजिटल रसीद आपके भुगतान का एक स्वतंत्र, अपरिवर्तनीय प्रमाण है। यह 'मैंने भुगतान कर दिया है' जैसे विवादों को रोकता है और साबित करता है कि राशि बैंक खाते में जमा हो गई है।",
+        q5: "अपरिचित लेनदेन दिखने पर क्या करें?",
+        a5: "यदि कोई ऋण या निकासी दिखाई दे जिसके बारे में चर्चा नहीं हुई थी, तो तुरंत 'रिपोर्ट / विवाद' बटन पर क्लिक करें। यह समीक्षा अधिकारी को सूचित करेगा।",
+        q6: "यदि समूह भुगतान में देरी हो तो क्या होगा?",
+        a6: "यदि 1 या 2 सदस्य भी समय पर भुगतान नहीं करते हैं, तो पूरा समूह डिफॉल्टर हो जाता है। SHG-Secure इसे समय से पहले पहचानता है ताकि समूह पहले ही चर्चा कर सके।",
+        q7: "भुगतान स्थिति को कैसे सत्यापित करें?",
+        a7: "अपने डिजिटल पासबुक की जांच करें। यदि 'VERIFIED' दिखाई दे तो बैंक को राशि मिल चुकी है। यदि 'PENDING' है, तो तुरंत समूह नेता से संपर्क करें।",
+        badge: "जागरूकता गाइड",
+        disclaimer: "नोट: यह एक जागरूकता मार्गदर्शिका है, बैंक की आधिकारिक सलाह नहीं।"
+    }
+};
+
+// Initialization and State Fetching
+document.addEventListener('DOMContentLoaded', () => {
+    fetchState();
+    setupEventListeners();
+});
+
+function fetchState() {
+    setLoading(true);
+    // Load local mock state by default for standalone demo
+    loadLocalMockState(appState.scenario);
+    
+    // Log in as lakshmi by default if not logged in
+    if (!appState.currentUser) {
+        appState.currentUser = { id: 1, username: 'lakshmi', full_name: 'Lakshmi Devi', role: 'MEMBER', shg_id: 1 };
+    }
+    
+    appState.currentView = 'dashboard';
+    setLoading(false);
+    renderApp();
+}
+
+function setupEventListeners() {
+    // Floating Scenario Button Click handlers
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const scenario = e.currentTarget.dataset.scenario;
+            triggerScenarioSwitch(scenario);
+        });
+    });
+    
+    // Language Switcher Event
+    document.addEventListener('change', (e) => {
+        if (e.target.id === 'lang-select') {
+            appState.currentLanguage = e.target.value;
+            renderFinancialAwareness();
+        }
+    });
+}
+
+function setLoading(val) {
+    appState.isLoading = val;
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+        if (val) loader.classList.remove('hidden');
+        else loader.classList.add('hidden');
+    }
+}
+
+// --- CORE ACTION TRIGGERS ---
+
+function triggerScenarioSwitch(sc) {
+    setLoading(true);
+    appState.scenario = sc;
+    loadLocalMockState(sc);
+    autoLoginForScenario(sc);
+    showToast(`Switched to Demo Scenario ${sc}!`, 'success');
+    setLoading(false);
+    renderApp();
+}
+
+function autoLoginForScenario(sc) {
+    let defaultUser = 'lakshmi'; // Member Lakshmi for payments/awareness
+    if (sc === 'C') {
+        defaultUser = 'reviewer'; // Bank review officer to inspect cash mismatch
+    } else if (sc === 'D') {
+        defaultUser = 'lakshmi'; // Radha has dispute, Lakshmi will review/vote too
+    } else if (sc === 'E') {
+        defaultUser = 'sujatha'; // Leader Sujatha created the expense, can also check members response
+    }
+    
+    // Run login
+    handleLoginAction(defaultUser);
+}
+
+function handleLoginAction(username) {
+    setLoading(true);
+    const mockUsers = {
+        'lakshmi': { id: 1, username: 'lakshmi', full_name: 'Lakshmi Devi', role: 'MEMBER', shg_id: 1 },
+        'anitha': { id: 2, username: 'anitha', full_name: 'Anitha Reddy', role: 'MEMBER', shg_id: 1 },
+        'sujatha': { id: 3, username: 'sujatha', full_name: 'Sujatha Rao', role: 'LEADER', shg_id: 1 },
+        'reviewer': { id: 11, username: 'reviewer', full_name: 'Authorized Review Officer', role: 'REVIEWER', shg_id: null },
+        'admin': { id: 12, username: 'admin', full_name: 'System Administrator', role: 'ADMIN', shg_id: null }
+    };
+    const user = mockUsers[username.toLowerCase()];
+    if (user) {
+        appState.currentUser = user;
+        appState.currentView = 'dashboard';
+        showToast(`Logged in as ${user.full_name} (${user.role})`, 'success');
+    } else {
+        showToast("Login failed.", 'danger');
+    }
+    setLoading(false);
+    renderApp();
+}
+
+function handleLogoutAction() {
+    setLoading(true);
+    appState.currentUser = null;
+    appState.currentView = 'landing';
+    appState.demoGuidedActive = false;
+    showToast("Successfully logged out.", "success");
+    setLoading(false);
+    renderApp();
+}
+
+function resetSystem() {
+    setLoading(true);
+    appState.scenario = 'A';
+    appState.currentUser = null;
+    appState.currentView = 'landing';
+    appState.demoGuidedActive = false;
+    loadLocalMockState('A');
+    showToast("Demo system completely reset to Scenario A.", "success");
+    setLoading(false);
+    renderApp();
+}
+
+appState.selectedPaymentMethod = 'UPI';
+
+function selectPaymentMethod(method) {
+    appState.selectedPaymentMethod = method;
+    
+    const upiBtn = document.getElementById('pay-method-upi');
+    const bankBtn = document.getElementById('pay-method-bank');
+    
+    if (upiBtn && bankBtn) {
+        if (method === 'UPI') {
+            upiBtn.className = 'flex flex-col items-center justify-center p-4 border border-emerald-600 bg-emerald-50/30 rounded-xl transition text-center group';
+            bankBtn.className = 'flex flex-col items-center justify-center p-4 border border-slate-200 hover:border-emerald-600 rounded-xl transition text-center group';
+        } else {
+            upiBtn.className = 'flex flex-col items-center justify-center p-4 border border-slate-200 hover:border-emerald-600 rounded-xl transition text-center group';
+            bankBtn.className = 'flex flex-col items-center justify-center p-4 border border-emerald-600 bg-emerald-50/30 rounded-xl transition text-center group';
+        }
+    }
+}
+
+function executeSimulatedPayment() {
+    const payBtn = document.getElementById('pay-primary-btn');
+    if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing Payment...
+        `;
+    }
+    
+    setTimeout(() => {
+        confirmSimulatedPayment(appState.selectedPaymentMethod || 'UPI');
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = 'PAY ₹1,000';
+        }
+    }, 1500);
+}
+
+function initiatePayment() {
+    // Select UPI by default when showing modal
+    selectPaymentMethod('UPI');
+    
+    // Show Simulated Payment Modal
+    const modal = document.getElementById('payment-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closePaymentModal() {
+    const modal = document.getElementById('payment-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+function confirmSimulatedPayment(method) {
+    closePaymentModal();
+    setLoading(true);
+    
+    const record = appState.members.find(m => m.username === appState.currentUser.username);
+    const uniqueId = Math.floor(100000 + Math.random() * 900000);
+    const generatedTxnId = 'SHG-DEMO-' + uniqueId;
+    
+    if (record) {
+        record.status = 'VERIFIED';
+        record.amount = 1000.0;
+        record.payment_date = new Date().toISOString().replace('T', ' ').split('.')[0];
+        record.txn_id = generatedTxnId;
+        record.is_cash_deposit = 0;
+    }
+    
+    appState.auditLogs.unshift({
+        id: appState.auditLogs.length + 1,
+        event_type: 'PAYMENT',
+        message: appState.currentUser.full_name + ' paid ₹1,000 via ' + method + '.',
+        timestamp: new Date().toISOString().replace('T', ' ').split('.')[0]
+    });
+    
+    recalculateLocalRiskAndCollection();
+    
+    const receipt = {
+        shgName: appState.shg.name,
+        memberName: appState.currentUser.full_name,
+        amount: 1000.0,
+        purpose: 'Monthly Contribution Dues',
+        date: new Date().toLocaleDateString('en-GB'),
+        method: method,
+        txnId: generatedTxnId,
+        status: 'VERIFIED',
+        message: 'Reconciled & Safe: Verified by Bank statements.'
+    };
+    
+    showReceipt(receipt);
+    setLoading(false);
+    renderApp();
+}
+
+function showReceipt(receipt) {
+    const receiptContent = document.getElementById('receipt-content');
+    receiptContent.innerHTML = `
+        <div class="border-b border-dashed border-slate-200 pb-4 mb-4 text-center">
+            <div class="text-emerald-700 text-xl font-black mb-1">✓ PAYMENT SUCCESSFUL</div>
+            <p class="text-xs text-slate-500">DIGITAL RECORD & LEDGER ENTRY</p>
+        </div>
+        <div class="space-y-2 text-sm text-slate-700">
+            <div class="flex justify-between"><span class="font-medium text-slate-400">SHG Group:</span> <span class="font-bold text-slate-800">${receipt.shgName}</span></div>
+            <div class="flex justify-between"><span class="font-medium text-slate-400">Member:</span> <span class="font-bold text-slate-800">${receipt.memberName}</span></div>
+            <div class="flex justify-between"><span class="font-medium text-slate-400">Amount Paid:</span> <span class="font-bold text-emerald-700 text-lg">₹${receipt.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span></div>
+            <div class="flex justify-between"><span class="font-medium text-slate-400">Purpose:</span> <span class="font-medium text-slate-800">${receipt.purpose}</span></div>
+            <div class="flex justify-between"><span class="font-medium text-slate-400">Payment Date:</span> <span class="font-medium text-slate-800">${receipt.date}</span></div>
+            <div class="flex justify-between"><span class="font-medium text-slate-400">Transaction ID:</span> <span class="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-1 py-0.5 rounded">${receipt.txnId}</span></div>
+            <div class="flex justify-between"><span class="font-medium text-slate-400">Status:</span> <span class="status-pill bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase">VERIFIED</span></div>
+        </div>
+        <div class="mt-6 pt-4 border-t border-dashed border-slate-200 text-center text-xs text-emerald-800 bg-emerald-50 p-2.5 rounded">
+            <p class="font-semibold">${receipt.message}</p>
+        </div>
+        <div class="mt-2 text-center text-[10px] text-red-500 font-medium">
+            * DEMO PAYMENT — NO REAL MONEY TRANSFERRED *
+        </div>
+    `;
+    
+    // Set up receipt print/download simulation
+    document.getElementById('download-receipt-btn').onclick = () => {
+        alert(`Simulated Receipt Download for ${receipt.txnId}. File saved as SHG_Secure_Receipt_${receipt.txnId}.pdf`);
+    };
+    
+    const modal = document.getElementById('receipt-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeReceiptModal() {
+    const modal = document.getElementById('receipt-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Transaction Voting / Verification
+function submitVote(txType, txId, response) {
+    if (response === 'UNAWARE' || response === 'DISPUTED') {
+        // Show dispute reason inputs
+        const reason = prompt("Please provide a reason or concern for the Authorized Reviewer:", "I was not informed about this transaction in our meetings.");
+        if (reason === null) return; // user cancelled prompt
+        
+        sendVoteRequest(txType, txId, response, reason);
+    } else {
+        sendVoteRequest(txType, txId, response, "");
+    }
+}
+
+function sendVoteRequest(txType, txId, response, reason) {
+    setLoading(true);
+    let target = null;
+    if (txType === 'LOAN') {
+        target = appState.loans.find(l => l.id == txId);
+    } else if (txType === 'EXPENSE') {
+        target = appState.expenses.find(e => e.id == txId);
+    }
+    
+    if (target) {
+        let userVote = target.verifications.find(v => v.username === appState.currentUser.username);
+        if (userVote) {
+            userVote.response = response;
+            userVote.reason = reason;
+        } else {
+            target.verifications.push({
+                username: appState.currentUser.username,
+                response: response,
+                reason: reason
+            });
+        }
+        
+        appState.auditLogs.unshift({
+            id: appState.auditLogs.length + 1,
+            event_type: 'VOTE',
+            message: appState.currentUser.full_name + ' voted ' + response + ' on ' + txType + ' ID ' + txId + '.',
+            timestamp: new Date().toISOString().replace('T', ' ').split('.')[0]
+        });
+        
+        recalculateLocalRiskAndCollection();
+        showToast(`Response recorded successfully: ${response}`, 'success');
+    }
+    setLoading(false);
+    renderApp();
+}
+
+// Create Expense (Leader capability)
+function openExpenseModal() {
+    const modal = document.getElementById('expense-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Set default demo data to make evaluate easy
+    document.getElementById('expense-amount').value = '';
+    document.getElementById('expense-purpose').value = '';
+}
+
+function closeExpenseModal() {
+    const modal = document.getElementById('expense-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function submitExpense() {
+    const amountVal = document.getElementById('expense-amount').value;
+    const purposeVal = document.getElementById('expense-purpose').value.trim();
+    
+    if (!amountVal || parseFloat(amountVal) <= 0 || !purposeVal) {
+        showToast("Please enter a valid amount and description.", 'danger');
+        return;
+    }
+    
+    closeExpenseModal();
+    setLoading(true);
+    
+    const newId = appState.expenses.length + 1;
+    const amount = parseFloat(amountVal);
+    const isAnomaly = amount > 50000;
+    
+    appState.expenses.push({
+        id: newId,
+        amount: amount,
+        purpose: purposeVal,
+        status: isAnomaly ? 'PENDING' : 'APPROVED',
+        date: new Date().toISOString().replace('T', ' ').split('.')[0],
+        verifications: [
+            { username: appState.currentUser.username, response: 'AWARE', reason: 'Logged expense' }
+        ]
+    });
+    
+    appState.auditLogs.unshift({
+        id: appState.auditLogs.length + 1,
+        event_type: 'EXPENSE',
+        message: appState.currentUser.full_name + ' logged expense of ₹' + amount.toLocaleString('en-IN') + '.',
+        timestamp: new Date().toISOString().replace('T', ' ').split('.')[0]
+    });
+    
+    recalculateLocalRiskAndCollection();
+    
+    if (isAnomaly) {
+        showToast("Expense logged! Risk Engine flagged transaction as UNUSUAL size. Marked PENDING member review.", "warning");
+    } else {
+        showToast("Expense logged and verified successfully.", "success");
+    }
+    setLoading(false);
+    renderApp();
+}
+
+// Open Dispute Modal (for general concerns)
+function openDisputeModal(txType, txId) {
+    const modal = document.getElementById('dispute-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    document.getElementById('dispute-tx-type').value = txType;
+    document.getElementById('dispute-tx-id').value = txId;
+    document.getElementById('dispute-reason').value = '';
+}
+
+function closeDisputeModal() {
+    const modal = document.getElementById('dispute-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function submitGeneralDispute() {
+    const txType = document.getElementById('dispute-tx-type').value;
+    const txId = document.getElementById('dispute-tx-id').value;
+    const reason = document.getElementById('dispute-reason').value.trim();
+    
+    if (!reason) {
+        showToast("Please state your concern.", 'danger');
+        return;
+    }
+    
+    closeDisputeModal();
+    setLoading(true);
+    
+    const newId = appState.disputes.length + 1;
+    appState.disputes.push({
+        id: newId,
+        transaction_type: txType,
+        transaction_id: parseInt(txId),
+        member_name: appState.currentUser.full_name,
+        reason: reason,
+        status: 'PENDING'
+    });
+    
+    if (txType === 'LOAN') {
+        const loan = appState.loans.find(l => l.id == txId);
+        if (loan) loan.status = 'UNDER_REVIEW';
+    } else if (txType === 'EXPENSE') {
+        const exp = appState.expenses.find(e => e.id == txId);
+        if (exp) exp.status = 'UNDER_REVIEW';
+    }
+    
+    appState.auditLogs.unshift({
+        id: appState.auditLogs.length + 1,
+        event_type: 'DISPUTE',
+        message: appState.currentUser.full_name + ' raised a dispute on ' + txType + ' ID ' + txId + '.',
+        timestamp: new Date().toISOString().replace('T', ' ').split('.')[0]
+    });
+    
+    recalculateLocalRiskAndCollection();
+    showToast(`Concern logged. Dispute ID: DISP-${newId.toString().padStart(4, '0')}`, 'success');
+    setLoading(false);
+    renderApp();
+}
+
+function resolveDispute(disputeId, resolution) {
+    setLoading(true);
+    const dispute = appState.disputes.find(d => d.id == disputeId);
+    if (dispute) {
+        dispute.status = resolution;
+        
+        if (resolution === 'APPROVED' || resolution === 'RESOLVED') {
+            if (dispute.transaction_type === 'LOAN') {
+                const loan = appState.loans.find(l => l.id == dispute.transaction_id);
+                if (loan) loan.status = 'APPROVED';
+            } else if (dispute.transaction_type === 'EXPENSE') {
+                const exp = appState.expenses.find(e => e.id == dispute.transaction_id);
+                if (exp) exp.status = 'APPROVED';
+            }
+        }
+        
+        appState.auditLogs.unshift({
+            id: appState.auditLogs.length + 1,
+            event_type: 'DISPUTE_RESOLUTION',
+            message: 'Dispute ID ' + disputeId + ' resolved as ' + resolution + '.',
+            timestamp: new Date().toISOString().replace('T', ' ').split('.')[0]
+        });
+        
+        recalculateLocalRiskAndCollection();
+        showToast(`Dispute ${disputeId} resolved as ${resolution}.`, 'success');
+    }
+    setLoading(false);
+    renderApp();
+}
+
+// --- RENDER SYSTEM ---
+
+function renderApp() {
+    // 1. Render global header with role status
+    renderHeader();
+    
+    // 2. Hide/Show layouts based on state
+    const landingSection = document.getElementById('landing-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    
+    if (appState.currentView === 'landing') {
+        landingSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+        renderLandingPage();
+    } else {
+        landingSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        renderDashboard();
+    }
+    
+    // Update scenario button visual state in floating panel
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+        if (btn.dataset.scenario === appState.scenario) {
+            btn.classList.add('border-emerald-500', 'bg-emerald-950', 'text-white');
+            btn.classList.remove('border-slate-700', 'bg-slate-900', 'text-slate-400');
+        } else {
+            btn.classList.remove('border-emerald-500', 'bg-emerald-950', 'text-white');
+            btn.classList.add('border-slate-700', 'bg-slate-900', 'text-slate-400');
+        }
+    });
+}
+
+function renderHeader() {
+    const headerDiv = document.getElementById('app-header');
+    if (!appState.currentUser) {
+        headerDiv.innerHTML = `
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="appState.currentView = 'landing'; renderApp();">
+                    <div class="bg-emerald-800 text-white p-2 rounded-lg font-bold flex items-center justify-center">🛡️</div>
+                    <span class="font-extrabold text-xl tracking-tight text-emerald-900">SHG-Secure</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="handleLoginAction('lakshmi');" class="bg-emerald-800 hover:bg-emerald-900 text-white font-semibold text-sm px-4 py-2 rounded-lg transition">
+                        Demo Login
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    const roleColors = {
+        'MEMBER': 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        'LEADER': 'bg-blue-100 text-blue-800 border-blue-300',
+        'REVIEWER': 'bg-purple-100 text-purple-800 border-purple-300',
+        'ADMIN': 'bg-slate-200 text-slate-800 border-slate-400'
+    };
+    
+    headerDiv.innerHTML = `
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="appState.currentView = 'landing'; renderApp();">
+                <div class="bg-emerald-800 text-white p-2 rounded-lg font-bold flex items-center justify-center">🛡️</div>
+                <span class="font-extrabold text-xl tracking-tight text-emerald-900">SHG-Secure</span>
+            </div>
+            
+            <!-- Quick Role Switching dropdown for evaluator convenience -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500 font-semibold hidden md:inline">Quick Role Switch:</span>
+                <select id="header-role-switcher" onchange="handleLoginAction(this.value);" class="bg-white border border-slate-200 text-xs font-bold text-slate-700 py-1.5 px-3 rounded-lg focus:outline-none focus:border-emerald-800">
+                    <option value="lakshmi" ${appState.currentUser.username === 'lakshmi' ? 'selected' : ''}>Lakshmi (Member)</option>
+                    <option value="sujatha" ${appState.currentUser.username === 'sujatha' ? 'selected' : ''}>Sujatha (Leader)</option>
+                    <option value="reviewer" ${appState.currentUser.username === 'reviewer' ? 'selected' : ''}>Bank Reviewer (Review Officer)</option>
+                    <option value="admin" ${appState.currentUser.username === 'admin' ? 'selected' : ''}>System Admin</option>
+                </select>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-slate-800">${appState.currentUser.full_name}</p>
+                        <p class="text-[10px] text-slate-500 font-medium">ID: ${appState.currentUser.username === 'reviewer' ? 'RO-001' : appState.currentUser.username === 'admin' ? 'ADM-99' : 'SHG001-M' + (appState.members.findIndex(m => m.username === appState.currentUser.username) + 1)}</p>
+                    </div>
+                    <span class="border px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider ${roleColors[appState.currentUser.role] || 'bg-slate-100'}">${appState.currentUser.role}</span>
+                </div>
+                <button onclick="handleLogoutAction();" class="text-slate-500 hover:text-slate-800 transition text-sm font-semibold border border-slate-200 px-3 py-1.5 rounded-lg bg-white">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function renderLandingPage() {
+    // Fill the Landing Section HTML
+    const landing = document.getElementById('landing-section');
+    landing.innerHTML = `
+        <div class="max-w-6xl mx-auto px-4 py-16">
+            <!-- Hero section -->
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="bg-emerald-100 text-emerald-950 font-extrabold text-xs tracking-wider uppercase px-3 py-1.5 rounded-full">FinTech + Social Impact Innovation</span>
+                <h1 class="font-extrabold text-4xl sm:text-5xl text-emerald-950 tracking-tight mt-6 leading-tight">
+                    Every Member Deserves <br class="hidden sm:inline" /> <span class="text-emerald-700 bg-emerald-50 px-2 rounded-lg">Financial Visibility</span>
+                </h1>
+                <p class="text-slate-600 text-base sm:text-lg mt-6 max-w-2xl mx-auto leading-relaxed">
+                    SHG-Secure protects Self-Help Group members through cashless payments, verified transaction receipts, bank-led reconciliation, and real-time shortfall warnings.
+                </p>
+                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                    <button onclick="appState.currentView = 'dashboard'; handleLoginAction('lakshmi');" class="btn-primary-custom px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-emerald-800/10">
+                        Launch Demo Dashboard
+                    </button>
+                    <button onclick="startGuidedDemo();" class="bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition px-8 py-3.5 rounded-xl font-bold text-sm">
+                        ▶ Guided Competition Tour
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Flow illustration: Before vs After -->
+            <div class="grid md:grid-cols-2 gap-8 mb-20">
+                <!-- BEFORE -->
+                <div class="glass-panel p-8 rounded-2xl border-red-200 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-red-100 text-red-800 px-3 py-1 rounded-bl-xl text-xs font-bold">Traditional Process (Risk Points)</div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
+                        <span class="text-xl">❌</span> The Old Cash Collection Way
+                    </h3>
+                    
+                    <div class="flex flex-col gap-4 mb-6">
+                        <div class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100">
+                            <span class="text-red-500 font-bold">1</span>
+                            <p class="text-xs text-slate-600">Member hands monthly contribution in cash to Group Leader (disputable, no proof).</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100">
+                            <span class="text-red-500 font-bold">2</span>
+                            <p class="text-xs text-slate-600">Leader manually writes records in paper notebook (prone to delay, damage, or alterations).</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-100">
+                            <span class="text-red-500 font-bold">3</span>
+                            <p class="text-xs text-slate-600">Leader delays bank deposit. Members remain blind to bank accounts and loan statuses.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded-xl border border-red-100 text-xs text-red-800 flex items-start gap-3">
+                        <span class="text-lg">⚠️</span>
+                        <div>
+                            <p class="font-bold">Core Vulnerabilities:</p>
+                            <p class="mt-0.5">Misappropriation risk, delayed bank deposits, transaction blindspots, and last-minute bank default pressure on innocent members.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AFTER -->
+                <div class="glass-panel p-8 rounded-2xl border-emerald-200 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-bl-xl text-xs font-bold">SHG-Secure Process</div>
+                    <h3 class="font-bold text-lg text-emerald-950 mb-6 flex items-center gap-2">
+                        <span class="text-xl">✅</span> Cashless & Transparent Flow
+                    </h3>
+                    
+                    <div class="flex flex-col gap-4 mb-6">
+                        <div class="flex items-center gap-3 bg-emerald-50/50 p-3 rounded-lg border border-emerald-100/50">
+                            <span class="text-emerald-800 font-bold">1</span>
+                            <p class="text-xs text-slate-700">Members pay directly to the group's bank account via simulated UPI/QR code.</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-emerald-50/50 p-3 rounded-lg border border-emerald-100/50">
+                            <span class="text-emerald-800 font-bold">2</span>
+                            <p class="text-xs text-slate-700">Digital ledger automatically records verified transaction receipts instantly.</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-emerald-50/50 p-3 rounded-lg border border-emerald-100/50">
+                            <span class="text-emerald-800 font-bold">3</span>
+                            <p class="text-xs text-slate-700">Automated engines monitor bank statements, track deadlines, and trigger alert responses.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 text-xs text-emerald-900 flex items-start gap-3">
+                        <span class="text-lg">🛡️</span>
+                        <div>
+                            <p class="font-bold">Safety and Protection:</p>
+                            <p class="mt-0.5">Dual-member verification of loans, automated ledger reconciliation, and early warning dashboard prevents default and fraud.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Key differentiators banner -->
+            <div class="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 relative overflow-hidden mb-16">
+                <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-800/10 rounded-full blur-3xl"></div>
+                <h3 class="font-extrabold text-2xl text-center mb-10">Beyond Basic Dashboards: The Unified Security System</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <span class="text-3xl block mb-3">📱</span>
+                        <h4 class="font-bold text-sm text-emerald-400 mb-1">Cashless Contributions</h4>
+                        <p class="text-xs text-slate-400">Direct digital payment eliminates physical cash collection and leader dependency risks.</p>
+                    </div>
+                    <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <span class="text-3xl block mb-3">⚖️</span>
+                        <h4 class="font-bold text-sm text-emerald-400 mb-1">Auto Reconciliation</h4>
+                        <p class="text-xs text-slate-400">Instantly compares digital ledger logs with bank receipts to highlight deposits mismatches.</p>
+                    </div>
+                    <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <span class="text-3xl block mb-3">📢</span>
+                        <h4 class="font-bold text-sm text-emerald-400 mb-1">Member Verification</h4>
+                        <p class="text-xs text-slate-400">Requires members to acknowledge large loans, blockading unauthorized transactions.</p>
+                    </div>
+                    <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <span class="text-3xl block mb-3">⏳</span>
+                        <h4 class="font-bold text-sm text-emerald-400 mb-1">Deadline Protection</h4>
+                        <p class="text-xs text-slate-400">Monitors loan repayment dates, warning members of group shortfall liability early.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Privacy & Disclaimers -->
+            <div class="border-t border-slate-200 pt-8 text-center text-xs text-slate-500">
+                <p class="max-w-2xl mx-auto">
+                    <strong>Demo Security & Privacy:</strong> Financial information is visible only to authorized users according to their role. Sensitive personal and banking credentials are never stored. This system is a competition prototype and does not process real monetary funds.
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+function renderDashboard() {
+    const dashboard = document.getElementById('dashboard-section');
+    
+    // Outer structure with side panel or grid
+    dashboard.innerHTML = `
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Active Scenario Banner -->
+            ${renderScenarioNotificationBanner()}
+            
+            <!-- Dashboard Main content grid based on active role -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Main columns -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Important Alerts Section -->
+                    ${renderImportantAlertsHTML()}
+
+                    ${renderRoleSpecificDashboard()}
+                    
+                    <!-- Shared Passbook component -->
+                    ${renderPassbookHTML()}
+                </div>
+                
+                <!-- Sidebar components -->
+                <div class="space-y-8">
+                    <!-- Overall risk indicator -->
+                    ${renderRiskGaugeHTML()}
+                    
+                    <!-- Bank Reconciliation component -->
+                    ${renderReconciliationHTML()}
+                    
+                    <!-- Core Message Mission Section -->
+                    ${renderCoreMessageHTML()}
+                    
+                    <!-- Financial Awareness card list -->
+                    <div id="financial-awareness-card" class="glass-panel p-6 rounded-2xl border border-slate-200">
+                        <!-- Loaded dynamically via translation switcher -->
+                    </div>
+                    
+                    <!-- Concerns/Disputes Module -->
+                    ${renderGeneralReportFormHTML()}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Fill awareness content
+    renderFinancialAwareness();
+    
+    // Draw SVG charts
+    drawRiskChart();
+    drawReconciliationChart();
+}
+
+function renderScenarioNotificationBanner() {
+    const sc = appState.scenario;
+    const scenarios = {
+        'A': {
+            title: "Scenario A: Normal Operations",
+            desc: "All 10 members paid contributions digitally on time. Reconciliation matches perfectly, and risk is LOW. Group loan is safely serviced.",
+            color: "border-emerald-200 bg-emerald-50 text-emerald-950"
+        },
+        'B': {
+            title: "Scenario B: Shortfall Detected (8 of 10 Paid)",
+            desc: "8 members paid on time, but 2 (Geetha and Shanti) are pending. Group faces ₹2,000 bank loan payment shortfall risk. Risk level rises to MEDIUM.",
+            color: "border-amber-200 bg-amber-50 text-amber-950 animate-pulse-warning"
+        },
+        'C': {
+            title: "Scenario C: Cash Collection Mismatch Alert",
+            desc: "Leader collected ₹2,000 cash from 2 members. Total ledger records ₹10,000, but actual bank account received only ₹8,000. System raises a reconciliation alert.",
+            color: "border-red-200 bg-red-50 text-red-950 animate-pulse-danger"
+        },
+        'D': {
+            title: "Scenario D: Major Transaction Unaware Alert",
+            desc: "A new bank loan of ₹3,00,000 was sanctioned. 3 members marked themselves as UNAWARE. Dispute raised. Loan flagged for review.",
+            color: "border-purple-200 bg-purple-50 text-purple-950"
+        },
+        'E': {
+            title: "Scenario E: Unusual Transaction Anomaly Alert",
+            desc: "Leader entered an expense of ₹1,50,000. Risk Engine flagged it as anomalous size compared to previous logs (avg. ₹13,750). marked PENDING review.",
+            color: "border-amber-200 bg-amber-50 text-amber-950"
+        },
+        'F': {
+            title: "Scenario F: Deadline Critical Alarm",
+            desc: "Repayment deadline is TOMORROW. ₹2,000 shortfall remains. Risk spikes to HIGH, triggering automated mobile and ledger warning signals.",
+            color: "border-red-200 bg-red-50 text-red-950 animate-pulse-danger"
+        }
+    };
+    
+    const banner = scenarios[sc] || scenarios['A'];
+    
+    return `
+        <div class="border-l-4 p-4 rounded-r-xl border-slate-300 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 ${banner.color}">
+            <div>
+                <h4 class="font-extrabold text-sm sm:text-base">${banner.title}</h4>
+                <p class="text-xs mt-1 text-slate-600 max-w-3xl">${banner.desc}</p>
+            </div>
+            <button onclick="resetSystem();" class="text-xs bg-slate-900 text-white font-bold px-3 py-2 rounded-lg hover:bg-slate-800 transition shrink-0">
+                ↺ Reset Demo
+            </button>
+        </div>
+    `;
+}
+
+function renderRoleSpecificDashboard() {
+    const role = appState.currentUser.role;
+    if (role === 'MEMBER') {
+        return renderMemberDashboardHTML();
+    } else if (role === 'LEADER') {
+        return renderLeaderDashboardHTML();
+    } else if (role === 'REVIEWER') {
+        return renderReviewerDashboardHTML();
+    } else if (role === 'ADMIN') {
+        return renderAdminDashboardHTML();
+    }
+    return '';
+}
+
+// --- MEMBER WORKFLOW VIEW ---
+function renderMemberDashboardHTML() {
+    const myUser = appState.currentUser;
+    const myPayment = appState.members.find(m => m.id === myUser.id);
+    const paymentStatus = myPayment && myPayment.status === 'VERIFIED';
+    
+    // Check if there are active loans requiring member verifications/votes
+    let verificationsHTML = '';
+    
+    // Check loans
+    appState.loans.forEach(loan => {
+        const myVote = loan.verifications.find(v => v.username === myUser.username);
+        if (loan.status === 'UNDER_REVIEW' || loan.status === 'PENDING_VERIFICATION') {
+            const hasVoted = myVote && myVote.response !== 'PENDING';
+            verificationsHTML += `
+                <div class="bg-gradient-to-r from-emerald-50 to-blue-50/50 p-6 rounded-xl border border-emerald-100 flex flex-col gap-4">
+                    <div class="flex flex-wrap justify-between items-start">
+                        <div>
+                            <span class="bg-amber-100 text-amber-900 text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded-full uppercase">Loan Verification Needed</span>
+                            <h4 class="font-extrabold text-base text-slate-800 mt-2">New Bank Loan Sanctioned: ₹${loan.amount.toLocaleString('en-IN')}</h4>
+                            <p class="text-xs text-slate-500 mt-1">Bank: ${loan.bank_name} | Purpose: ${loan.purpose}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-semibold text-slate-500">AWARENESS VOTE</span>
+                            <div class="text-xs font-bold text-slate-800 mt-1">${loan.aware_count}/10 Members Aware</div>
+                        </div>
+                    </div>
+                    
+                    ${hasVoted ? `
+                        <div class="bg-white/80 border border-slate-200 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-700 flex justify-between items-center">
+                            <span>Your response: <strong class="${myVote.response === 'AWARE' ? 'text-emerald-700' : 'text-red-700'}">${myVote.response}</strong></span>
+                            <span class="text-[10px] text-slate-400">Recorded: ${loan.sanctioned_date}</span>
+                        </div>
+                    ` : `
+                        <div>
+                            <p class="text-xs text-slate-600 font-semibold mb-3">Were you aware of this loan application and group discussion?</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="submitVote('LOAN', ${loan.id}, 'AWARE');" class="bg-emerald-800 hover:bg-emerald-950 text-white font-bold text-xs px-4 py-2 rounded-lg transition">
+                                    ✓ Yes, I am Aware
+                                </button>
+                                <button onclick="submitVote('LOAN', ${loan.id}, 'UNAWARE');" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg transition">
+                                    ✗ No, I am Not Aware
+                                </button>
+                                <button onclick="openDisputeModal('LOAN', ${loan.id});" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition">
+                                    ⚠️ Dispute Loan
+                                </button>
+                            </div>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+    });
+
+    // Check expenses
+    appState.expenses.forEach(exp => {
+        const myVote = exp.verifications.find(v => v.username === myUser.username);
+        if (exp.status === 'PENDING') {
+            const hasVoted = myVote && myVote.response !== 'PENDING';
+            verificationsHTML += `
+                <div class="bg-gradient-to-r from-amber-50 to-red-50/50 p-6 rounded-xl border border-amber-100 flex flex-col gap-4 mt-4">
+                    <div class="flex flex-wrap justify-between items-start">
+                        <div>
+                            <span class="bg-amber-100 text-amber-900 text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded-full uppercase">Expense Verification Needed</span>
+                            <h4 class="font-extrabold text-base text-slate-800 mt-2">New Expense Drafted: ₹${exp.amount.toLocaleString('en-IN')}</h4>
+                            <p class="text-xs text-slate-500 mt-1">Initiated by: ${exp.initiator_name} | Purpose: ${exp.purpose}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-semibold text-slate-500">AWARENESS VOTE</span>
+                            <div class="text-xs font-bold text-slate-800 mt-1">${exp.aware_count}/10 Members Aware</div>
+                        </div>
+                    </div>
+                    
+                    ${hasVoted ? `
+                        <div class="bg-white/80 border border-slate-200 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-700 flex justify-between items-center">
+                            <span>Your response: <strong class="${myVote.response === 'AWARE' ? 'text-emerald-700' : 'text-red-700'}">${myVote.response}</strong></span>
+                            <span class="text-[10px] text-slate-400">Recorded: ${exp.date}</span>
+                        </div>
+                    ` : `
+                        <div>
+                            <p class="text-xs text-slate-600 font-semibold mb-3">Were you informed and did you approve this expense?</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="submitVote('EXPENSE', ${exp.id}, 'AWARE');" class="bg-emerald-800 hover:bg-emerald-950 text-white font-bold text-xs px-4 py-2 rounded-lg transition">
+                                    ✓ Yes, Approve
+                                </button>
+                                <button onclick="submitVote('EXPENSE', ${exp.id}, 'UNAWARE');" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-lg transition">
+                                    ✗ No, Reject / Disapprove
+                                </button>
+                                <button onclick="openDisputeModal('EXPENSE', ${exp.id});" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition">
+                                    ⚠️ File Concern
+                                </button>
+                            </div>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+    });
+
+    let historyHTML = '';
+    if (paymentStatus) {
+        historyHTML = `
+            <div onclick="showReceipt({
+                shgName: 'Mahila Jyothi SHG',
+                memberName: '${myUser.full_name}',
+                amount: 1000.00,
+                purpose: 'Monthly Contribution Dues',
+                date: '${myPayment.payment_date || "08 Aug 2026"}',
+                txnId: '${myPayment.txn_id || "SHG-DEMO-0001"}',
+                status: 'VERIFIED',
+                message: 'Payment successfully recorded in SHG financial ledger.'
+            });" class="p-3 border border-slate-100 hover:border-emerald-700 bg-emerald-50/20 rounded-lg cursor-pointer transition flex justify-between items-center">
+                <div>
+                    <span class="text-xs font-bold text-slate-800 block">August 2026</span>
+                    <span class="text-[9px] text-slate-400 font-mono">${myPayment.txn_id || 'SHG-DEMO-0001'} &bull; ${appState.lastPaymentMethod || 'UPI Demo'}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-extrabold text-emerald-800 block">₹1,000</span>
+                    <span class="text-[9px] bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-bold uppercase">✓ VERIFIED</span>
+                </div>
+            </div>
+        `;
+    } else {
+        historyHTML = `
+            <div class="text-center py-6 text-xs text-slate-400 font-semibold">
+                No payment records found for August 2026.
+            </div>
+        `;
+    }
+
+    historyHTML += `
+        <div onclick="showReceipt({
+            shgName: 'Mahila Jyothi SHG',
+            memberName: '${myUser.full_name}',
+            amount: 1000.00,
+            purpose: 'Monthly Contribution',
+            date: '07 Jul 2026',
+            txnId: 'SHG-DEMO-771239',
+            status: 'VERIFIED',
+            message: 'Payment successfully recorded in SHG financial ledger.'
+        });" class="p-3 border border-slate-100 hover:border-emerald-700 bg-slate-50/50 rounded-lg cursor-pointer transition flex justify-between items-center mt-2">
+            <div>
+                <span class="text-xs font-bold text-slate-800 block">July 2026</span>
+                <span class="text-[9px] text-slate-400 font-mono">SHG-DEMO-771239 &bull; UPI Demo</span>
+            </div>
+            <div class="text-right">
+                <span class="text-xs font-extrabold text-emerald-850 block">₹1,000</span>
+                <span class="text-[9px] bg-emerald-100 text-emerald-850 px-1 py-0.5 rounded font-bold uppercase">✓ VERIFIED</span>
+            </div>
+        </div>
+    `;
+
+    return `
+        <div class="glass-panel p-8 rounded-2xl border border-slate-200 space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-100 pb-5">
+                <div>
+                    <h2 class="font-extrabold text-2xl text-emerald-950">Mahila Jyothi SHG</h2>
+                    <p class="text-xs text-slate-500 mt-1">SHG Group ID: SHG001 | Registered Bank Account: State Bank of India *9842</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-semibold text-slate-400 uppercase">My ID Code</span>
+                    <p class="font-extrabold text-lg text-emerald-800">${myUser.username === 'reviewer' ? 'RO-001' : myUser.username === 'admin' ? 'ADM-99' : 'SHG001-M' + (appState.members.findIndex(m => m.username === myUser.username) + 1)}</p>
+                </div>
+            </div>
+            
+            <!-- Member contribution card and history -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Payment status box -->
+                <div class="border rounded-xl p-5 flex flex-col justify-between ${paymentStatus ? 'border-emerald-200 bg-emerald-50/50' : 'border-amber-200 bg-amber-50/30'}">
+                    <div>
+                        <span class="text-xs text-slate-500 font-semibold uppercase">My Contribution Status (August 2026)</span>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="text-3xl font-extrabold text-slate-800">₹1,000.00</span>
+                            <span class="status-pill ${paymentStatus ? 'status-verified' : 'status-pending'}">
+                                ${paymentStatus ? '✓ VERIFIED' : '⏰ PENDING'}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1.5">${paymentStatus ? 'Your payment is safely reconciled and deposited in the SHG Bank Account.' : 'Monthly contribution is due. Submit payment digitally to avoid group shortfall.'}</p>
+                    </div>
+                    
+                    ${paymentStatus ? `
+                        <div class="mt-4 flex flex-col gap-2">
+                            <span class="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-2 rounded-lg border border-emerald-300 text-center block">
+                                ✓ CONTRIBUTION VERIFIED
+                            </span>
+                            <button onclick="showReceipt({
+                                shgName: 'Mahila Jyothi SHG',
+                                memberName: '${myUser.full_name}',
+                                amount: 1000.00,
+                                purpose: 'Monthly Contribution Dues',
+                                date: '${myPayment.payment_date || "08 Aug 2026"}',
+                                txnId: '${myPayment.txn_id || "SHG-DEMO-0001"}',
+                                status: 'VERIFIED',
+                                message: 'Payment successfully recorded in SHG financial ledger.'
+                            });" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg transition text-center uppercase tracking-wider">
+                                📄 VIEW DIGITAL RECEIPT
+                            </button>
+                        </div>
+                    ` : `
+                        <button onclick="initiatePayment();" class="mt-4 bg-emerald-800 hover:bg-emerald-950 text-white font-extrabold text-xs py-3.5 px-4 rounded-lg transition shadow-sm w-full uppercase tracking-wider">
+                            💳 PAY MONTHLY CONTRIBUTION
+                        </button>
+                    `}
+                </div>
+                
+                <!-- Group stats status overview -->
+                <div class="border border-slate-200 rounded-xl p-5 space-y-4 bg-white flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-slate-400 font-semibold uppercase block mb-1">Group Contribution Rate</span>
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-2xl font-extrabold text-slate-800">${appState.members.filter(m => m.status === 'VERIFIED').length}/10 Paid</span>
+                            <span class="text-xs font-semibold text-slate-500">Expected: ₹10,000</span>
+                        </div>
+                        
+                        <!-- Simple progress bar -->
+                        <div class="w-full bg-slate-100 rounded-full h-2 mt-3">
+                            <div class="bg-emerald-700 h-2 rounded-full transition-all duration-500" style="width: ${appState.members.filter(m => m.status === 'VERIFIED').length * 10}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between text-xs font-semibold pt-2 border-t border-slate-100">
+                        <span class="text-emerald-700 font-bold">Verified: ₹${(appState.members.filter(m => m.status === 'VERIFIED').length * 1000).toLocaleString('en-IN')}</span>
+                        <span class="text-amber-700 font-bold">Pending: ₹${(appState.members.filter(m => m.status !== 'VERIFIED').length * 1000).toLocaleString('en-IN')}</span>
+                    </div>
+                </div>
+
+                <!-- My Payment History box -->
+                <div class="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                    <span class="text-xs text-slate-400 font-bold uppercase block tracking-wider">My Payment History</span>
+                    <div class="space-y-2">
+                        ${historyHTML}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Member verification alerts box -->
+            ${verificationsHTML ? `
+                <div class="space-y-4">
+                    <h3 class="font-extrabold text-slate-800 text-sm tracking-wider uppercase">⚠️ Important Approvals & Voting</h3>
+                    ${verificationsHTML}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+// --- LEADER WORKFLOW VIEW ---
+function renderLeaderDashboardHTML() {
+    const listItems = appState.members.map(m => {
+        const isPaid = m.status === 'VERIFIED';
+        return `
+            <tr class="hover:bg-slate-50/50 transition">
+                <td class="px-4 py-3 text-xs font-bold text-slate-800">${m.full_name}</td>
+                <td class="px-4 py-3 text-[10px] font-mono text-slate-500">${m.username === 'sujatha' ? 'SHG001-M03' : 'SHG001-M' + (appState.members.indexOf(m) + 1).toString().padStart(2, '0')}</td>
+                <td class="px-4 py-3 text-xs font-semibold text-slate-700">₹${m.amount ? m.amount.toLocaleString('en-IN') : '1,000'}</td>
+                <td class="px-4 py-3">
+                    <span class="status-pill ${isPaid ? 'status-verified' : 'status-pending'}">
+                        ${isPaid ? '✓ PAID' : '⏰ PENDING'}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-xs text-slate-500">${m.payment_date || '-'}</td>
+                <td class="px-4 py-3 font-mono text-[10px]">${m.txn_id ? `<span class="bg-slate-100 px-1 rounded">${m.txn_id}</span>` : '-'}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div class="glass-panel p-8 rounded-2xl border border-slate-200 space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4 border-b border-slate-100 pb-5">
+                <div>
+                    <h2 class="font-extrabold text-2xl text-emerald-950">Leader Management Panel</h2>
+                    <p class="text-xs text-slate-500 mt-1">Sujatha Rao (Group Leader) | Mahila Jyothi SHG</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openExpenseModal();" class="bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs py-2 px-3 rounded-lg transition flex items-center gap-1 shadow-sm">
+                        ➕ Log Expense
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Member contribution table -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-sm text-slate-800 tracking-wider uppercase">Member Contribution Board</h3>
+                <div class="overflow-x-auto border border-slate-150 rounded-xl bg-white shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-150">
+                                <th class="px-4 py-2.5">Member Name</th>
+                                <th class="px-4 py-2.5">ID Code</th>
+                                <th class="px-4 py-2.5">Amount</th>
+                                <th class="px-4 py-2.5">Status</th>
+                                <th class="px-4 py-2.5">Date</th>
+                                <th class="px-4 py-2.5">Transaction Ref</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            ${listItems}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Audit Log header inside Leader View -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-sm text-slate-800 tracking-wider uppercase">🔒 Group Audit Trail (Platform Logs)</h3>
+                <div class="max-h-48 overflow-y-auto border border-slate-200 rounded-xl bg-slate-50 p-4 space-y-2">
+                    ${appState.auditLogs.map(log => `
+                        <div class="text-[11px] text-slate-600 flex flex-wrap justify-between gap-1 border-b border-slate-200/50 pb-1.5 last:border-0 last:pb-0">
+                            <span>
+                                <span class="text-slate-400 font-mono">${log.timestamp.split(' ')[1] || log.timestamp}</span> 
+                                <strong class="text-slate-700">${log.username}</strong> 
+                                <span class="bg-slate-200 px-1 py-0.5 rounded text-[8px] font-bold text-slate-500 uppercase">${log.role}</span>:
+                                ${log.action} - ${log.details}
+                            </span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- AUTHORIZED REVIEWER WORKFLOW VIEW ---
+function renderReviewerDashboardHTML() {
+    const listDisputes = appState.disputes.map(d => {
+        const isResolved = d.status === 'RESOLVED';
+        return `
+            <div class="border rounded-xl p-4 space-y-3 bg-white ${isResolved ? 'opacity-60' : 'border-purple-200'}">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="bg-purple-100 text-purple-800 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">${d.transaction_type} DISPUTE</span>
+                        <h4 class="font-extrabold text-sm text-slate-800 mt-1">Dispute: DISP-${d.id.toString().padStart(4, '0')}</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Raised by: ${d.full_name} (${d.username}) | Date: ${d.created_at}</p>
+                    </div>
+                    <span class="status-pill ${isResolved ? 'status-verified' : 'status-review'}">
+                        ${d.status}
+                    </span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border text-xs text-slate-600">
+                    <strong>Reason Filed:</strong> "${d.reason}"
+                </div>
+                
+                ${isResolved ? '' : `
+                    <div class="flex gap-2 justify-end">
+                        <button onclick="resolveDispute('DISP-${d.id.toString().padStart(4, '0')}', 'APPROVED');" class="bg-emerald-800 hover:bg-emerald-950 text-white font-bold text-[10px] px-3 py-1.5 rounded-md transition">
+                            ✓ Approve Transaction
+                        </button>
+                        <button onclick="resolveDispute('DISP-${d.id.toString().padStart(4, '0')}', 'CANCELLED');" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-md transition">
+                            ✗ Cancel Transaction
+                        </button>
+                    </div>
+                `}
+            </div>
+        `;
+    }).join('') || '<div class="text-center text-xs text-slate-400 py-6">No open disputes reported in monitoring registry.</div>';
+
+    return `
+        <div class="glass-panel p-8 rounded-2xl border border-slate-200 space-y-6">
+            <div class="border-b border-slate-100 pb-5">
+                <h2 class="font-extrabold text-2xl text-emerald-950">Authorized Review Registry</h2>
+                <p class="text-xs text-slate-500 mt-1">FinTech Platform Audit Officer Panel (SBI & AP-State Gov Monitored)</p>
+            </div>
+            
+            <!-- Aggregated Monitoring Stats (Simulated) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-white border rounded-xl p-4 shadow-sm text-center">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">SHGs Monitored</span>
+                    <span class="text-2xl font-black text-slate-800 mt-1">125</span>
+                </div>
+                <div class="bg-white border rounded-xl p-4 shadow-sm text-center">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Active Shortfalls</span>
+                    <span class="text-2xl font-black text-amber-600 mt-1">${appState.scenario === 'B' || appState.scenario === 'F' ? '13' : '12'}</span>
+                </div>
+                <div class="bg-white border rounded-xl p-4 shadow-sm text-center">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Open Disputes</span>
+                    <span class="text-2xl font-black text-red-600 mt-1">${appState.disputes.filter(d => d.status === 'OPEN').length}</span>
+                </div>
+                <div class="bg-white border rounded-xl p-4 shadow-sm text-center">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Mismatches</span>
+                    <span class="text-2xl font-black text-red-600 mt-1">${appState.reconciliation.mismatch ? '1' : '0'}</span>
+                </div>
+            </div>
+            
+            <!-- Dispute Registry List -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-sm text-slate-800 tracking-wider uppercase">Active Disputes & Concerns Registry</h3>
+                <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                    ${listDisputes}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- SYSTEM ADMIN WORKFLOW VIEW ---
+function renderAdminDashboardHTML() {
+    return `
+        <div class="glass-panel p-8 rounded-2xl border border-slate-200 space-y-6">
+            <div class="border-b border-slate-100 pb-5">
+                <h2 class="font-extrabold text-2xl text-emerald-950">System Configuration Dashboard</h2>
+                <p class="text-xs text-slate-500 mt-1">Maintain configurations, seed databases, and review live processes.</p>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 gap-6">
+                <!-- DB Setup Panel -->
+                <div class="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                    <h4 class="font-bold text-sm text-slate-800 uppercase tracking-wider">Database Operations</h4>
+                    <p class="text-xs text-slate-500">Trigger database re-seeding manually or purge logs for testing.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="resetSystem();" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3 py-2 rounded-lg transition">
+                            PURGE & RESET DB
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- System Configs -->
+                <div class="border border-slate-200 rounded-xl p-5 space-y-4 bg-white">
+                    <h4 class="font-bold text-sm text-slate-800 uppercase tracking-wider">Simulated Bank Accounts</h4>
+                    <p class="text-xs text-slate-500">Configure simulated bank credentials and reconciliation API targets.</p>
+                    <div class="text-xs font-semibold text-slate-600 bg-slate-50 p-3 rounded-lg space-y-1">
+                        <div>Reconciliation Interval: <span class="font-bold text-emerald-700">Real-time (On Event)</span></div>
+                        <div>Bank Endpoint: <span class="font-bold text-emerald-700">https://api.sbi.demo/shg/v1/recon</span></div>
+                        <div>Audit Integrity: <span class="font-bold text-emerald-700">SHA-256 Chain Signed</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- SHARED UI MODULES ---
+
+function renderPassbookHTML() {
+    const sc = appState.scenario;
+    
+    let shgLoanStatus = "VERIFIED";
+    if (sc === 'D' || sc === 'B' || sc === 'F') {
+        shgLoanStatus = "VERIFICATION REQUIRED";
+    }
+    
+    let transactions = [
+        {
+            date: '2026-08-08',
+            description: 'SHG Loan',
+            category: 'Loans',
+            amount: 300000.00,
+            isCredit: true,
+            status: shgLoanStatus
+        },
+        {
+            date: '2026-08-07',
+            description: 'Monthly Contribution',
+            category: 'Savings',
+            amount: 1000.00,
+            isCredit: true,
+            status: 'VERIFIED'
+        },
+        {
+            date: '2026-08-06',
+            description: 'Business Expense',
+            category: 'Expenses',
+            amount: 25000.00,
+            isCredit: false,
+            status: 'VERIFIED'
+        },
+        {
+            date: '2026-06-15',
+            description: 'Loan Repayment',
+            category: 'Repayments',
+            amount: 15000.00,
+            isCredit: false,
+            status: 'VERIFIED'
+        }
+    ];
+
+    // Sort transactions by date descending
+    transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
+    
+    // Render list
+    const passbookItems = transactions.map(t => {
+        let statusBadge = '';
+        if (t.status === 'VERIFIED') {
+            statusBadge = '<span class="status-pill bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase">VERIFIED</span>';
+        } else if (t.status === 'VERIFICATION REQUIRED') {
+            statusBadge = '<span class="status-pill bg-amber-100 text-amber-800 border border-amber-300 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase animate-pulse">VERIFICATION REQUIRED</span>';
+        } else {
+            statusBadge = `<span class="status-pill bg-slate-100 text-slate-800 border border-slate-300 font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase">${t.status}</span>`;
+        }
+
+        return `
+            <tr class="hover:bg-slate-50 transition border-b last:border-0 border-slate-100">
+                <td class="px-4 py-3 text-xs font-semibold text-slate-500">${t.date}</td>
+                <td class="px-4 py-3 text-xs font-bold text-slate-800">${t.description}</td>
+                <td class="px-4 py-3 text-xs font-semibold text-slate-500 uppercase">${t.category}</td>
+                <td class="px-4 py-3 text-xs font-extrabold ${t.isCredit ? 'text-emerald-700' : 'text-red-600'}">
+                    ${t.isCredit ? '+' : '-'} ₹${t.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                </td>
+                <td class="px-4 py-3 text-right">${statusBadge}</td>
+            </tr>
+        `;
+    }).join('');
+
+    return `
+        <div class="glass-panel p-6 rounded-2xl border border-slate-200 space-y-4 bg-white">
+            <div class="flex flex-wrap justify-between items-center gap-3 border-b pb-4 border-slate-100">
+                <div>
+                    <h3 class="font-extrabold text-lg text-emerald-950">📚 Recent Transactions</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Real-time ledger transparency of bank accounts and group assets.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="passbook-search" oninput="filterPassbookTable(this.value);" placeholder="Search transactions..." class="bg-white border text-xs font-semibold py-1.5 px-3 rounded-lg focus:outline-none focus:border-emerald-800 max-w-44 shadow-sm" />
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-150 bg-white">
+                <table class="w-full text-left border-collapse" id="passbook-table">
+                    <thead>
+                        <tr class="bg-slate-50 text-[10px] font-extrabold text-slate-400 uppercase border-b">
+                            <th class="px-4 py-2.5">Date</th>
+                            <th class="px-4 py-2.5">Description</th>
+                            <th class="px-4 py-2.5">Category</th>
+                            <th class="px-4 py-2.5">Amount</th>
+                            <th class="px-4 py-2.5 text-right">Verification</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        ${passbookItems || '<tr><td colspan="5" class="text-center py-6 text-xs text-slate-400">No transactions recorded in passbook.</td></tr>'}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function filterPassbookTable(query) {
+    const table = document.getElementById('passbook-table');
+    const rows = table.getElementsByTagName('tr');
+    const lowerQuery = query.toLowerCase();
+    
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        let match = false;
+        
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j].innerText.toLowerCase().includes(lowerQuery)) {
+                match = true;
+                break;
+            }
+        }
+        
+        if (match) row.style.display = '';
+        else row.style.display = 'none';
+    }
+}
+
+function renderRiskGaugeHTML() {
+    const rs = appState.riskScore;
+    const levelColors = {
+        'LOW RISK': 'text-emerald-700 bg-emerald-50 border-emerald-100',
+        'MEDIUM RISK': 'text-amber-700 bg-amber-50 border-amber-100 animate-pulse-warning',
+        'HIGH RISK': 'text-red-700 bg-red-50 border-red-100 animate-pulse-danger',
+        'URGENT': 'text-red-700 bg-red-100 border-red-300 font-extrabold animate-pulse'
+    };
+    
+    const badgeColor = levelColors[rs.level] || 'text-slate-700 bg-slate-50 border-slate-100';
+
+    return `
+        <div class="glass-panel p-6 rounded-2xl border border-slate-200 space-y-4 bg-white">
+            <h3 class="font-extrabold text-sm text-slate-800 tracking-wider uppercase flex items-center justify-between">
+                <span>🛡️ Financial Health</span>
+                <span class="border px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider ${badgeColor}">${rs.level}</span>
+            </h3>
+            
+            <div class="flex items-center gap-6 py-2">
+                <!-- Circular Score Gauge -->
+                <div class="w-20 h-20 shrink-0 relative flex items-center justify-center">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                        <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="${rs.level === 'LOW RISK' ? 'text-emerald-700' : (rs.level === 'MEDIUM RISK' ? 'text-amber-500' : 'text-red-600')}" stroke-dasharray="${rs.score}, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="absolute text-center flex flex-col">
+                        <span class="text-base font-black text-slate-800 leading-none">${rs.score}</span>
+                        <span class="text-[8px] text-slate-400 font-bold">/100</span>
+                    </div>
+                </div>
+                
+                <div class="flex-grow grid grid-cols-1 gap-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-semibold">Payment Completion:</span>
+                        <span class="font-extrabold text-slate-800">${rs.onTimeRate.toFixed(0)}%</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-semibold">Bank Reconciliation:</span>
+                        <span class="font-extrabold ${rs.bankReconciliation === 'VERIFIED' ? 'text-emerald-700' : 'text-red-600'}">${rs.bankReconciliation}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-semibold">Days to Deadline:</span>
+                        <span class="font-extrabold text-slate-800">${rs.daysRemaining} days</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderReconciliationHTML() {
+    const rs = appState.riskScore;
+    const recon = appState.reconciliation;
+    
+    const amountDue = 10000;
+    const verifiedAmount = recon.bankReceived;
+    const pendingAmount = amountDue - verifiedAmount;
+    
+    let deadlineText = "";
+    if (appState.scenario === 'B') {
+        deadlineText = "3 Days Remaining";
+    } else if (appState.scenario === 'F') {
+        deadlineText = "DEADLINE TOMORROW";
+    } else {
+        deadlineText = `${rs.daysRemaining} Days Remaining`;
+    }
+    
+    let riskStatus = "";
+    let riskBadgeColor = "";
+    if (appState.scenario === 'B') {
+        riskStatus = "HIGH RISK";
+        riskBadgeColor = "bg-red-100 text-red-800 border-red-200 animate-pulse";
+    } else if (appState.scenario === 'F') {
+        riskStatus = "URGENT";
+        riskBadgeColor = "bg-red-600 text-white border-red-700 animate-pulse font-extrabold";
+    } else if (rs.level === 'HIGH' || rs.level === 'HIGH RISK') {
+        riskStatus = "HIGH RISK";
+        riskBadgeColor = "bg-red-100 text-red-800 border-red-200";
+    } else if (rs.level === 'MEDIUM' || rs.level === 'MEDIUM RISK') {
+        riskStatus = "MEDIUM RISK";
+        riskBadgeColor = "bg-amber-100 text-amber-800 border-amber-200";
+    } else {
+        riskStatus = "LOW RISK";
+        riskBadgeColor = "bg-emerald-100 text-emerald-800 border-emerald-200";
+    }
+
+    return `
+        <div class="glass-panel p-6 rounded-2xl border border-slate-200 space-y-4 bg-white">
+            <h3 class="font-extrabold text-sm text-slate-800 tracking-wider uppercase flex items-center justify-between">
+                <span>🏦 Bank Repayment Status</span>
+                <span class="border px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider ${riskBadgeColor}">${riskStatus}</span>
+            </h3>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span class="text-xs text-slate-500 font-semibold">Amount Due</span>
+                    <span class="text-sm font-extrabold text-slate-800">₹${amountDue.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span class="text-xs text-slate-500 font-semibold">Verified Amount</span>
+                    <span class="text-sm font-extrabold text-emerald-700">₹${verifiedAmount.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span class="text-xs text-slate-500 font-semibold">Pending Amount</span>
+                    <span class="text-sm font-extrabold text-red-600">₹${pendingAmount.toLocaleString('en-IN')}</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span class="text-xs text-slate-500 font-semibold">Deadline</span>
+                    <span class="text-xs font-bold text-slate-800">${deadlineText}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-500 font-semibold">Risk Status</span>
+                    <span class="text-xs font-bold text-slate-800">${riskStatus}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderImportantAlertsHTML() {
+    let alerts = [];
+    const sc = appState.scenario;
+    const myPayment = appState.members.find(m => m.username === appState.currentUser.username);
+    const paymentStatus = myPayment && myPayment.status === 'VERIFIED';
+    
+    if (appState.currentUser.role === 'MEMBER') {
+        if (paymentStatus) {
+            alerts.push({
+                type: 'success',
+                icon: '✓',
+                text: 'Your ₹1,000 contribution is verified.'
+            });
+        } else {
+            alerts.push({
+                type: 'warning',
+                icon: '⚠️',
+                text: 'Your ₹1,000 monthly contribution is pending.'
+            });
+        }
+    }
+    
+    if (sc === 'B') {
+        alerts.push({
+            type: 'warning',
+            icon: '⚠️',
+            text: '₹2,000 SHG contribution shortfall remains.'
+        });
+        alerts.push({
+            type: 'danger',
+            icon: '🚨',
+            text: 'Bank repayment deadline is approaching.'
+        });
+    } else if (sc === 'F') {
+        alerts.push({
+            type: 'warning',
+            icon: '⚠️',
+            text: '₹2,000 SHG contribution shortfall remains.'
+        });
+        alerts.push({
+            type: 'danger',
+            icon: '🚨',
+            text: 'Bank repayment deadline is approaching.'
+        });
+    } else if (sc === 'C') {
+        alerts.push({
+            type: 'danger',
+            icon: '⚠️',
+            text: 'Bank reconciliation mismatch of ₹2,000 detected.'
+        });
+    } else if (sc === 'D') {
+        alerts.push({
+            type: 'warning',
+            icon: '⚠️',
+            text: 'A major transaction requires member verification.'
+        });
+    } else if (sc === 'E') {
+        alerts.push({
+            type: 'warning',
+            icon: '⚠️',
+            text: 'A major transaction requires member verification.'
+        });
+    }
+    
+    if (alerts.length === 0) return '';
+    
+    const alertItems = alerts.map(a => {
+        let bg = 'bg-slate-50 border-slate-200 text-slate-700';
+        if (a.type === 'success') bg = 'bg-emerald-50 border-emerald-100 text-emerald-800';
+        if (a.type === 'warning') bg = 'bg-amber-50 border-amber-200 text-amber-800';
+        if (a.type === 'danger') bg = 'bg-red-50 border-red-200 text-red-800';
+        
+        return `
+            <div class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold rounded-lg border ${bg}">
+                <span class="text-sm">${a.icon}</span>
+                <span>${a.text}</span>
+            </div>
+        `;
+    }).join('');
+    
+    return `
+        <div class="glass-panel p-4 rounded-xl border border-slate-200 bg-white space-y-2 mb-6">
+            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">🔔 Important Alerts</span>
+            <div class="grid gap-2">
+                ${alertItems}
+            </div>
+        </div>
+    `;
+}
+
+function renderCoreMessageHTML() {
+    return `
+        <div class="glass-panel p-6 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 to-emerald-950 text-white space-y-4 text-center">
+            <span class="text-[9px] font-extrabold text-emerald-400 uppercase tracking-widest block">Core Platform Mission</span>
+            <h4 class="font-extrabold text-xs tracking-tight text-white leading-tight uppercase">
+                EVERY MEMBER DESERVES FINANCIAL VISIBILITY
+            </h4>
+            <div class="flex flex-wrap justify-center items-center gap-1.5 text-[10px] text-slate-300 font-bold py-1">
+                <span class="bg-white/10 px-2 py-0.5 rounded">Digital Payment</span>
+                <span class="text-emerald-400">&rarr;</span>
+                <span class="bg-white/10 px-2 py-0.5 rounded">Verification</span>
+                <span class="text-emerald-400">&rarr;</span>
+                <span class="bg-white/10 px-2 py-0.5 rounded">Reconciliation</span>
+                <span class="text-emerald-400">&rarr;</span>
+                <span class="bg-white/10 px-2 py-0.5 rounded">Alerts</span>
+                <span class="text-emerald-400">&rarr;</span>
+                <span class="bg-white/10 px-2 py-0.5 rounded">Protection</span>
+            </div>
+        </div>
+    `;
+}
+
+function renderFinancialAwareness() {
+    const card = document.getElementById('financial-awareness-card');
+    if (!card) return;
+    
+    const dict = translations[appState.currentLanguage] || translations['en'];
+    
+    card.innerHTML = `
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+            <h3 class="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span>📖</span> ${dict.title}
+            </h3>
+            <select id="lang-select" class="bg-slate-100 border-0 text-[10px] font-extrabold text-emerald-800 py-1.5 px-2.5 rounded-lg focus:outline-none">
+                <option value="en" ${appState.currentLanguage === 'en' ? 'selected' : ''}>English</option>
+                <option value="te" ${appState.currentLanguage === 'te' ? 'selected' : ''}>తెలుగు</option>
+                <option value="hi" ${appState.currentLanguage === 'hi' ? 'selected' : ''}>हिन्दी</option>
+            </select>
+        </div>
+        
+        <p class="text-[10px] text-slate-500 font-medium mb-4">${dict.subtitle}</p>
+        
+        <!-- Accordion format awareness details -->
+        <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <div class="border border-slate-150 rounded-lg p-2.5 bg-white">
+                <button onclick="toggleAwarenessCollapse(this);" class="w-full text-left font-bold text-xs text-slate-700 flex justify-between items-center focus:outline-none">
+                    <span>${dict.q1}</span>
+                    <span class="text-[10px] text-slate-400">+</span>
+                </button>
+                <p class="text-[10px] text-slate-500 mt-1.5 hidden">${dict.a1}</p>
+            </div>
+            
+            <div class="border border-slate-150 rounded-lg p-2.5 bg-white">
+                <button onclick="toggleAwarenessCollapse(this);" class="w-full text-left font-bold text-xs text-slate-700 flex justify-between items-center focus:outline-none">
+                    <span>${dict.q4}</span>
+                    <span class="text-[10px] text-slate-400">+</span>
+                </button>
+                <p class="text-[10px] text-slate-500 mt-1.5 hidden">${dict.a4}</p>
+            </div>
+            
+            <div class="border border-slate-150 rounded-lg p-2.5 bg-white">
+                <button onclick="toggleAwarenessCollapse(this);" class="w-full text-left font-bold text-xs text-slate-700 flex justify-between items-center focus:outline-none">
+                    <span>${dict.q5}</span>
+                    <span class="text-[10px] text-slate-400">+</span>
+                </button>
+                <p class="text-[10px] text-slate-500 mt-1.5 hidden">${dict.a5}</p>
+            </div>
+            
+            <div class="border border-slate-150 rounded-lg p-2.5 bg-white">
+                <button onclick="toggleAwarenessCollapse(this);" class="w-full text-left font-bold text-xs text-slate-700 flex justify-between items-center focus:outline-none">
+                    <span>${dict.q6}</span>
+                    <span class="text-[10px] text-slate-400">+</span>
+                </button>
+                <p class="text-[10px] text-slate-500 mt-1.5 hidden">${dict.a6}</p>
+            </div>
+        </div>
+    `;
+}
+
+function toggleAwarenessCollapse(btn) {
+    const textNode = btn.nextElementSibling;
+    const signNode = btn.querySelector('span:last-child');
+    
+    if (textNode.classList.contains('hidden')) {
+        textNode.classList.remove('hidden');
+        signNode.innerText = '−';
+    } else {
+        textNode.classList.add('hidden');
+        signNode.innerText = '+';
+    }
+}
+
+function renderGeneralReportFormHTML() {
+    return `
+        <div class="glass-panel p-6 rounded-2xl border border-slate-200 space-y-4">
+            <h3 class="font-extrabold text-sm text-slate-800 tracking-wider uppercase">📞 Report a Financial Concern</h3>
+            <p class="text-xs text-slate-500">Submit a query or report unapproved financial records for review.</p>
+            
+            <form onsubmit="event.preventDefault(); submitGeneralConcernForm();" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Issue Category</label>
+                    <select id="concern-category" class="w-full bg-white border border-slate-200 text-xs font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-emerald-800">
+                        <option value="PAYMENT_MISSING">My Payment is missing in passbook</option>
+                        <option value="TRANSACTION_UNRECOGNIZED">I do not recognize a transaction</option>
+                        <option value="AMOUNT_INCORRECT">Recorded amount is incorrect</option>
+                        <option value="LOAN_INFO_UNRESOLVED">Loan detail is unannounced or incorrect</option>
+                        <option value="OTHER">Other general concern</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Describe Concern</label>
+                    <textarea id="concern-desc" rows="2" placeholder="Provide transaction date, details, or meeting notes..." class="w-full bg-white border border-slate-200 text-xs font-semibold py-2 px-3 rounded-lg focus:outline-none focus:border-emerald-800" required></textarea>
+                </div>
+                <button type="submit" class="bg-emerald-800 hover:bg-emerald-950 text-white font-bold text-xs py-2 px-4 rounded-lg transition shadow-sm w-full">
+                    Submit Secure Report
+                </button>
+            </form>
+            <div class="text-[9px] text-slate-400 font-medium leading-tight mt-2">
+                * Note: Concern logs are recorded in the audit registry for banking officers. SHG-Secure is a prototype tool and does not represent direct government police or legal authorities.
+            </div>
+        </div>
+    `;
+}
+
+function submitGeneralConcernForm() {
+    const category = document.getElementById('concern-category').value;
+    const desc = document.getElementById('concern-desc').value.trim();
+    
+    setLoading(true);
+    const newId = appState.disputes.length + 1;
+    appState.disputes.push({
+        id: newId,
+        transaction_type: 'PAYMENT',
+        transaction_id: 1,
+        member_name: appState.currentUser.full_name,
+        reason: `[Category: ${category}] ${desc}`,
+        status: 'PENDING'
+    });
+    
+    appState.auditLogs.unshift({
+        id: appState.auditLogs.length + 1,
+        event_type: 'CONCERN',
+        message: appState.currentUser.full_name + ' logged a concern under category ' + category + '.',
+        timestamp: new Date().toISOString().replace('T', ' ').split('.')[0]
+    });
+    
+    showToast(`Concern logged successfully. Ref: DISP-${newId.toString().padStart(4, '0')}`, 'success');
+    document.getElementById('concern-desc').value = '';
+    setLoading(false);
+    renderApp();
+}
+
+// Placeholder functions for drawing SVGs or lightweight visual aids
+function drawRiskChart() {
+    // Done dynamically in render
+}
+
+function drawReconciliationChart() {
+    // Done dynamically in render
+}
+
+// --- COMPETITION TOUR (GUIDED WALKTHROUGH) ---
+
+const guidedTourSteps = [
+    {
+        title: "Introduction: The Real-World SHG Problem",
+        desc: "Under the legacy process, members pay ₹1,000 cash to the leader Sujatha. Sujatha holds the cash, delays deposit, and members remain blind to the bank ledger. Let's see how SHG-Secure protects members.",
+        action: () => {
+            appState.currentView = 'landing';
+            renderApp();
+        }
+    },
+    {
+        title: "Step 1: Direct Cashless Payment",
+        desc: "First, Member Lakshmi logs in. Lakshmi's dashboard shows her monthly contribution status is PENDING. Instead of giving cash to the leader, Lakshmi pays digitally directly to the group's authorized bank account.",
+        action: () => {
+            appState.currentView = 'dashboard';
+            handleLoginAction('lakshmi');
+        }
+    },
+    {
+        title: "Step 2: Digital Payment Simulation",
+        desc: " Lakshmi clicks 'Pay Contribution Digitally' and selects her payment method (UPI / QR). We simulate the transaction securely.",
+        action: () => {
+            initiatePayment();
+        }
+    },
+    {
+        title: "Step 3: Receipt & Immutable Ledger Log",
+        desc: "Payment is successful! A digital receipt is generated with a unique reference ID. This receipt is automatically recorded in the ledger, proving the contribution reached the bank directly.",
+        action: () => {
+            closePaymentModal();
+            confirmSimulatedPayment('UPI');
+        }
+    },
+    {
+        title: "Step 4: The 8/10 Payment Shortfall Problem",
+        desc: "Now, let's switch to Scenario B. 8 members paid, but 2 are pending. The bank deadline is approaching. The group dashboard displays an orange warning: '₹2,000 Group Repayment Shortfall Risk'. paying members see their own status as PAID, but the group risk is HIGHLIGHTED.",
+        action: () => {
+            closeReceiptModal();
+            triggerScenarioSwitch('B');
+        }
+    },
+    {
+        title: "Step 5: Leader Cash Collection Mismatch Alert",
+        desc: "What happens if a leader collects cash but delays deposit? Switch to Scenario C. Leader reports ₹10,000 collected (including ₹2,000 cash), but the Bank account received only ₹8,000. The reconciliation engine immediately raises a 'FINANCIAL MISMATCH' alert on everyone's dashboard.",
+        action: () => {
+            triggerScenarioSwitch('C');
+        }
+    },
+    {
+        title: "Step 6: Loan Transparency & Member Voting",
+        desc: "Now switch to Scenario D. A bank loan of ₹3,00,000 is sanctioned. Ordinary members Radha, Kavitha, and Maya find themselves unaware of it. Radford disputes it. The loan is immediately flagged 'REQUIRES REVIEW' with member awareness votes displayed.",
+        action: () => {
+            triggerScenarioSwitch('D');
+        }
+    },
+    {
+        title: "Step 7: Reviewer Inspection & Resolution",
+        desc: "Finally, let's look at the Authorized Reviewer dashboard. The reviewer can inspect the open disputes raised by members, verify the awareness votes, and either Approve or Cancel the transaction.",
+        action: () => {
+            handleLoginAction('reviewer');
+        }
+    },
+    {
+        title: "Conclusion: Complete Financial Protection",
+        desc: "SHG-Secure eliminates transparency blindspots. Every transaction is tracked, verified, and audited. The group remains financially safe and empowered. Click 'Finish Tour' to explore the prototype freely!",
+        action: () => {
+            appState.currentView = 'landing';
+            renderApp();
+        }
+    }
+];
+
+function startGuidedDemo() {
+    appState.demoGuidedActive = true;
+    appState.demoGuidedStep = 0;
+    showGuidedStep();
+}
+
+function nextGuidedStep() {
+    if (appState.demoGuidedStep < guidedTourSteps.length - 1) {
+        appState.demoGuidedStep++;
+        showGuidedStep();
+    } else {
+        finishGuidedTour();
+    }
+}
+
+function prevGuidedStep() {
+    if (appState.demoGuidedStep > 0) {
+        appState.demoGuidedStep--;
+        showGuidedStep();
+    }
+}
+
+function finishGuidedTour() {
+    appState.demoGuidedActive = false;
+    const tourDiv = document.getElementById('demo-tour-banner');
+    if (tourDiv) tourDiv.classList.add('hidden');
+    appState.currentView = 'dashboard';
+    handleLoginAction('lakshmi');
+}
+
+function showGuidedStep() {
+    const step = guidedTourSteps[appState.demoGuidedStep];
+    step.action();
+    
+    let tourDiv = document.getElementById('demo-tour-banner');
+    if (!tourDiv) {
+        tourDiv = document.createElement('div');
+        tourDiv.id = 'demo-tour-banner';
+        tourDiv.className = 'fixed bottom-4 left-4 right-4 md:left-1/2 md:transform md:-translate-x-1/2 md:max-w-2xl bg-slate-950 text-white rounded-2xl p-5 shadow-2xl border border-emerald-500 z-50 animate-fade-in-up';
+        document.body.appendChild(tourDiv);
+    }
+    
+    tourDiv.classList.remove('hidden');
+    tourDiv.innerHTML = `
+        <div class="space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest">Competition Guide Tour (${appState.demoGuidedStep + 1}/${guidedTourSteps.length})</span>
+                <button onclick="finishGuidedTour();" class="text-slate-400 hover:text-white text-xs font-semibold">✕ Close</button>
+            </div>
+            <div>
+                <h4 class="font-extrabold text-sm sm:text-base text-slate-100">${step.title}</h4>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">${step.desc}</p>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="prevGuidedStep();" class="bg-slate-900 border border-slate-700 text-[10px] font-bold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition ${appState.demoGuidedStep === 0 ? 'opacity-50 pointer-events-none' : ''}">
+                    &larr; Prev
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="finishGuidedTour();" class="bg-slate-900 border border-slate-800 text-[10px] font-bold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+                        Skip
+                    </button>
+                    <button onclick="nextGuidedStep();" class="bg-emerald-800 hover:bg-emerald-900 text-[10px] font-bold px-4 py-1.5 rounded-lg text-white transition shadow-md shadow-emerald-800/10">
+                        ${appState.demoGuidedStep === guidedTourSteps.length - 1 ? 'Finish Tour' : 'Next Step &rarr;'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- UTILITIES ---
+
+function showToast(msg, type = 'success') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'fixed top-4 right-4 max-w-sm z-50 space-y-2';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    const colors = {
+        'success': 'bg-emerald-800 text-white border-emerald-900',
+        'warning': 'bg-amber-500 text-slate-950 border-amber-600',
+        'danger': 'bg-red-700 text-white border-red-800'
+    };
+    
+    toast.className = `p-4 rounded-xl shadow-lg border text-xs font-bold animate-fade-in-up ${colors[type] || colors['success']}`;
+    toast.innerText = msg;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 4000);
+}
+
+
+function loadLocalMockState(sc) {
+    appState.scenario = sc;
+    appState.shg = { id: 1, name: "Mahila Jyothi SHG", bank_account_no: "33049182390" };
+    
+    // Base 10 Members
+    appState.members = [
+        { id: 1, username: 'lakshmi', full_name: 'Lakshmi Devi', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 10:00:00', txn_id: 'TXN-SHG-DEMO-0001', is_cash_deposit: 0 },
+        { id: 2, username: 'anitha', full_name: 'Anitha Reddy', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 10:15:00', txn_id: 'TXN-SHG-DEMO-0002', is_cash_deposit: 0 },
+        { id: 3, username: 'sujatha', full_name: 'Sujatha Rao', role: 'LEADER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 10:30:00', txn_id: 'TXN-SHG-DEMO-0003', is_cash_deposit: 0 },
+        { id: 4, username: 'radha', full_name: 'Radha Kumari', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 10:45:00', txn_id: 'TXN-SHG-DEMO-0004', is_cash_deposit: 0 },
+        { id: 5, username: 'kavitha', full_name: 'Kavitha Patel', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 11:00:00', txn_id: 'TXN-SHG-DEMO-0005', is_cash_deposit: 0 },
+        { id: 6, username: 'maya', full_name: 'Maya Devi', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 11:15:00', txn_id: 'TXN-SHG-DEMO-0006', is_cash_deposit: 0 },
+        { id: 7, username: 'saroja', full_name: 'Sarojaamma', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 11:30:00', txn_id: 'TXN-SHG-DEMO-0007', is_cash_deposit: 0 },
+        { id: 8, username: 'latha', full_name: 'Latha Shenoy', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 11:45:00', txn_id: 'TXN-SHG-DEMO-0008', is_cash_deposit: 0 },
+        { id: 9, username: 'geetha', full_name: 'Geetha Nayak', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 12:00:00', txn_id: 'TXN-SHG-DEMO-0009', is_cash_deposit: 0 },
+        { id: 10, username: 'shanti', full_name: 'Shanti Priya', role: 'MEMBER', status: 'VERIFIED', amount: 1000.0, payment_date: '2026-08-07 12:15:00', txn_id: 'TXN-SHG-DEMO-0010', is_cash_deposit: 0 }
+    ];
+    
+    // Adjust payments based on scenario
+    if (sc === 'B' || sc === 'F') {
+        // Lakshmi and Shanti are pending (to allow Lakshmi to pay in the demo)
+        appState.members[0].status = 'PENDING';
+        appState.members[0].amount = 0.0;
+        appState.members[0].payment_date = null;
+        appState.members[0].txn_id = null;
+        
+        appState.members[9].status = 'PENDING';
+        appState.members[9].amount = 0.0;
+        appState.members[9].payment_date = null;
+        appState.members[9].txn_id = null;
+    } else if (sc === 'C') {
+        // Cash deposit mismatch
+        appState.members[8].is_cash_deposit = 1;
+        appState.members[8].txn_id = 'TXN-CASH-0009';
+        
+        appState.members[9].is_cash_deposit = 1;
+        appState.members[9].txn_id = 'TXN-CASH-0010';
+    }
+    
+    // Base Loans
+    appState.loans = [
+        { id: 1, bank_name: 'State Bank of India', amount: 200000.0, purpose: 'Agricultural Tools', status: 'APPROVED', sanctioned_date: '2026-01-10 11:30:00', amount_repaid: 90000.0, verifications: [] }
+    ];
+    
+    if (sc === 'D') {
+        appState.loans.push({
+            id: 2,
+            bank_name: 'Andhra Bank',
+            amount: 300000.0,
+            purpose: 'Unauthorized Dairy Farm Loan',
+            status: 'UNDER_REVIEW',
+            sanctioned_date: '2026-08-08 10:00:00',
+            amount_repaid: 0.0,
+            verifications: [
+                { username: 'radha', response: 'UNAWARE', reason: 'No discussion held' },
+                { username: 'kavitha', response: 'UNAWARE', reason: 'Unaware of this loan' },
+                { username: 'maya', response: 'UNAWARE', reason: 'Never signed for this' },
+                { username: 'lakshmi', response: 'PENDING', reason: '' }
+            ]
+        });
+    }
+    
+    // Base Expenses
+    appState.expenses = [
+        { id: 1, amount: 15000.0, purpose: 'Stationery & Register Books', status: 'APPROVED', date: '2026-05-10 11:00:00', verifications: [] },
+        { id: 2, amount: 12500.0, purpose: 'Meeting Venue Rent', status: 'APPROVED', date: '2026-06-12 12:00:00', verifications: [] }
+    ];
+    
+    if (sc === 'E') {
+        appState.expenses.push({
+            id: 3,
+            amount: 150000.0,
+            purpose: 'Bulk Sewing Machines (Anomalous size)',
+            status: 'PENDING',
+            date: '2026-08-08 14:00:00',
+            verifications: [
+                { username: 'lakshmi', response: 'PENDING', reason: '' }
+            ]
+        });
+    }
+    
+    // Base Disputes
+    appState.disputes = [];
+    if (sc === 'D') {
+        appState.disputes = [
+            { id: 1, transaction_type: 'LOAN', transaction_id: 2, member_name: 'Radha Kumari', reason: 'No group discussion held regarding Andhra Bank Loan.', status: 'PENDING' },
+            { id: 2, transaction_type: 'LOAN', transaction_id: 2, member_name: 'Kavitha Patel', reason: 'Unaware of dairy loan sanction.', status: 'PENDING' }
+        ];
+    }
+    
+    // Base Audit Logs
+    appState.auditLogs = [
+        { id: 1, event_type: 'SESSION', message: 'User logged in.', timestamp: '2026-08-08 18:00:00' },
+        { id: 2, event_type: 'METRIC', message: 'Scenario ' + sc + ' initialized in local fallback mode.', timestamp: '2026-08-08 18:01:00' }
+    ];
+    
+    recalculateLocalRiskAndCollection();
+}
+
+function recalculateLocalRiskAndCollection() {
+    const sc = appState.scenario;
+    const totalMembers = appState.members.length;
+    const paidCount = appState.members.filter(m => m.status === 'VERIFIED').length;
+    const shortfall = (totalMembers - paidCount) * 1000.0;
+    
+    // 1. Reconciliation
+    if (sc === 'C') {
+        appState.reconciliation = {
+            mismatch: true,
+            mismatchAmount: 2000.0,
+            ledgerBalance: 10000.0,
+            bankReceived: 8000.0
+        };
+    } else {
+        const collected = paidCount * 1000.0;
+        appState.reconciliation = {
+            mismatch: false,
+            mismatchAmount: 0.0,
+            ledgerBalance: collected,
+            bankReceived: collected
+        };
+    }
+    
+    // 2. Alerts
+    appState.alerts = [];
+    if (shortfall > 0) {
+        if (sc === 'F') {
+            appState.alerts.push({ id: 1, type: 'CRITICAL', title: 'Repayment Shortfall Crisis', message: '₹' + shortfall.toLocaleString('en-IN') + ' remains unpaid. Bank repayment deadline is TOMORROW!' });
+        } else {
+            appState.alerts.push({ id: 1, type: 'WARNING', title: 'Repayment Shortfall Risk', message: '₹' + shortfall.toLocaleString('en-IN') + ' monthly contribution shortfall remains. Bank repayment due in 7 days.' });
+        }
+    }
+    if (sc === 'C') {
+        appState.alerts.push({ id: 2, type: 'CRITICAL', title: 'Cash Deposit Reconciliation Mismatch', message: 'Group ledger lists ₹10,000 but bank statements verify only ₹8,000 received. Check cash collections immediately.' });
+    }
+    if (sc === 'D') {
+        const activeUnauth = appState.loans.find(l => l.id === 2);
+        if (activeUnauth && activeUnauth.status !== 'APPROVED' && activeUnauth.status !== 'RESOLVED') {
+            appState.alerts.push({ id: 3, type: 'CRITICAL', title: 'Unauthorized Transaction Audit Alert', message: '3 members marked themselves UNAWARE of the new ₹3,00,000 Andhra Bank loan. Transaction locked pending resolution.' });
+        }
+    }
+    if (sc === 'E') {
+        const activeAnomaly = appState.expenses.find(e => e.id === 3);
+        if (activeAnomaly && activeAnomaly.status === 'PENDING') {
+            appState.alerts.push({ id: 4, type: 'WARNING', title: 'Unusual Transaction Size Flagged', message: 'Expense draft of ₹1,50,000 is 10x higher than historic average (₹13,750). Mark your awareness vote.' });
+        }
+    }
+    
+    // 3. Dynamic Risk Score & Health parameters
+    let score = 85;
+    let level = 'LOW RISK';
+    let daysRemaining = 7;
+    let bankReconciliation = 'VERIFIED';
+    
+    if (sc === 'A') {
+        score = 85;
+        level = 'LOW RISK';
+        daysRemaining = 7;
+        bankReconciliation = 'VERIFIED';
+    } else if (sc === 'B') {
+        score = 40;
+        level = 'HIGH RISK';
+        daysRemaining = 3;
+        bankReconciliation = 'VERIFIED';
+    } else if (sc === 'F') {
+        score = 15;
+        level = 'URGENT';
+        daysRemaining = 1;
+        bankReconciliation = 'VERIFIED';
+    } else if (sc === 'C') {
+        score = 35;
+        level = 'HIGH RISK';
+        daysRemaining = 7;
+        bankReconciliation = 'MISMATCH';
+    } else if (sc === 'D') {
+        score = 50;
+        level = 'MEDIUM RISK';
+        daysRemaining = 7;
+        bankReconciliation = 'VERIFIED';
+    } else if (sc === 'E') {
+        score = 60;
+        level = 'MEDIUM RISK';
+        daysRemaining = 7;
+        bankReconciliation = 'VERIFIED';
+    }
+    
+    appState.riskScore = {
+        score: score,
+        level: level,
+        shortfall: shortfall,
+        daysRemaining: daysRemaining,
+        onTimeRate: (paidCount / totalMembers) * 100,
+        bankReconciliation: bankReconciliation,
+        reasons: []
+    };
+}
+

@@ -1101,6 +1101,65 @@ table tr {
 }
 
 /* ==========================================================================
+   DESKTOP TABLE BALANCED COLUMN PROPORTIONS & FIXED LAYOUT (>= 769px)
+   ========================================================================== */
+@media (min-width: 769px) {
+  table {
+    table-layout: fixed !important;
+    width: 100% !important;
+  }
+
+  /* 1. Member Payment Status in My SHG (4 columns: 30% | 22% | 24% | 24%) */
+  #member-status-table th:nth-child(1), #member-status-table td:nth-child(1) { width: 30% !important; }
+  #member-status-table th:nth-child(2), #member-status-table td:nth-child(2) { width: 22% !important; }
+  #member-status-table th:nth-child(3), #member-status-table td:nth-child(3) { width: 24% !important; }
+  #member-status-table th:nth-child(4), #member-status-table td:nth-child(4) { width: 24% !important; }
+
+  /* 2. Group Member Dues on Dashboard (5 columns: 28% | 20% | 16% | 18% | 18%) */
+  #group-dues-table th:nth-child(1), #group-dues-table td:nth-child(1) { width: 28% !important; }
+  #group-dues-table th:nth-child(2), #group-dues-table td:nth-child(2) { width: 20% !important; }
+  #group-dues-table th:nth-child(3), #group-dues-table td:nth-child(3) { width: 16% !important; }
+  #group-dues-table th:nth-child(4), #group-dues-table td:nth-child(4) { width: 18% !important; }
+  #group-dues-table th:nth-child(5), #group-dues-table td:nth-child(5) { width: 18% !important; }
+
+  /* 3. Recent Ledger Transactions (6 columns: 15% | 22% | 20% | 15% | 15% | 13%) */
+  #recent-ledger-table th:nth-child(1), #recent-ledger-table td:nth-child(1) { width: 15% !important; }
+  #recent-ledger-table th:nth-child(2), #recent-ledger-table td:nth-child(2) { width: 22% !important; }
+  #recent-ledger-table th:nth-child(3), #recent-ledger-table td:nth-child(3) { width: 20% !important; }
+  #recent-ledger-table th:nth-child(4), #recent-ledger-table td:nth-child(4) { width: 15% !important; }
+  #recent-ledger-table th:nth-child(5), #recent-ledger-table td:nth-child(5) { width: 15% !important; }
+  #recent-ledger-table th:nth-child(6), #recent-ledger-table td:nth-child(6) { width: 13% !important; }
+
+  /* 4. Transaction History (5 columns: 18% | 24% | 18% | 18% | 22%) */
+  #txn-history-table th:nth-child(1), #txn-history-table td:nth-child(1) { width: 18% !important; }
+  #txn-history-table th:nth-child(2), #txn-history-table td:nth-child(2) { width: 24% !important; }
+  #txn-history-table th:nth-child(3), #txn-history-table td:nth-child(3) { width: 18% !important; }
+  #txn-history-table th:nth-child(4), #txn-history-table td:nth-child(4) { width: 18% !important; }
+  #txn-history-table th:nth-child(5), #txn-history-table td:nth-child(5) { width: 22% !important; }
+
+  /* 5. Passbook Table (5 columns: 16% | 32% | 18% | 18% | 16%) */
+  #passbook-table th:nth-child(1), #passbook-table td:nth-child(1) { width: 16% !important; }
+  #passbook-table th:nth-child(2), #passbook-table td:nth-child(2) { width: 32% !important; }
+  #passbook-table th:nth-child(3), #passbook-table td:nth-child(3) { width: 18% !important; }
+  #passbook-table th:nth-child(4), #passbook-table td:nth-child(4) { width: 18% !important; }
+  #passbook-table th:nth-child(5), #passbook-table td:nth-child(5) { width: 16% !important; }
+
+  /* 6. Leader Management Board (6 columns: 24% | 16% | 14% | 15% | 15% | 16%) */
+  #leader-board-table th:nth-child(1), #leader-board-table td:nth-child(1) { width: 24% !important; }
+  #leader-board-table th:nth-child(2), #leader-board-table td:nth-child(2) { width: 16% !important; }
+  #leader-board-table th:nth-child(3), #leader-board-table td:nth-child(3) { width: 14% !important; }
+  #leader-board-table th:nth-child(4), #leader-board-table td:nth-child(4) { width: 15% !important; }
+  #leader-board-table th:nth-child(5), #leader-board-table td:nth-child(5) { width: 15% !important; }
+  #leader-board-table th:nth-child(6), #leader-board-table td:nth-child(6) { width: 16% !important; }
+
+  /* 7. Recent Payment History in My Finances (4 columns: 25% | 29% | 23% | 23%) */
+  #finances-history-table th:nth-child(1), #finances-history-table td:nth-child(1) { width: 25% !important; }
+  #finances-history-table th:nth-child(2), #finances-history-table td:nth-child(2) { width: 29% !important; }
+  #finances-history-table th:nth-child(3), #finances-history-table td:nth-child(3) { width: 23% !important; }
+  #finances-history-table th:nth-child(4), #finances-history-table td:nth-child(4) { width: 23% !important; }
+}
+
+/* ==========================================================================
    FORMS & INPUTS
    ========================================================================== */
 
@@ -2866,15 +2925,124 @@ div:has(> #login-form) {
     border-radius: 1rem !important;
   }
 
-  /* Table Horizontal Scrolling inside container */
+  /* ==========================================================================
+     MOBILE TABLE HORIZONTAL SCROLL & CELL ALIGNMENT (<= 768px ONLY)
+     ========================================================================== */
+  .overflow-x-auto,
   .table-wrapper,
-  div:has(> table),
-  .overflow-x-auto {
+  div:has(> table) {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
+    overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     box-sizing: border-box !important;
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+    direction: ltr !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+  }
+
+  /* Table width on mobile: prevents columns from crushing, starts at left edge */
+  .overflow-x-auto table,
+  .overflow-x-auto > table,
+  .table-wrapper table,
+  div:has(> table) > table {
+    min-width: 700px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    table-layout: auto !important;
+    text-align: left !important;
+    direction: ltr !important;
+    transform: none !important;
+  }
+
+  /* Headers and data cells strictly protected from character-breaking on mobile */
+  .overflow-x-auto th,
+  .overflow-x-auto td,
+  .table-wrapper th,
+  .table-wrapper td,
+  div:has(> table) th,
+  div:has(> table) td {
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+    text-align: left !important;
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+  }
+
+  /* Leftmost first column explicitly anchored to left edge */
+  .overflow-x-auto th:first-child,
+  .overflow-x-auto td:first-child,
+  .table-wrapper th:first-child,
+  .table-wrapper td:first-child,
+  div:has(> table) th:first-child,
+  div:has(> table) td:first-child {
+    padding-left: 1rem !important;
+    text-align: left !important;
+  }
+
+  /* All cell child elements stay inline and unbroken */
+  .overflow-x-auto td *,
+  .overflow-x-auto th *,
+  .table-wrapper td *,
+  .table-wrapper th *,
+  div:has(> table) td *,
+  div:has(> table) th * {
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+  }
+
+  /* Badges, amounts, IDs, dates, and buttons stay together on mobile */
+  .overflow-x-auto td .status-pill,
+  .overflow-x-auto td .status-badge,
+  .overflow-x-auto td .status-badge-green,
+  .overflow-x-auto td .status-verified,
+  .overflow-x-auto td .status-pending,
+  .overflow-x-auto td span[class*="status-"],
+  .overflow-x-auto td span[class*="badge-"],
+  .table-wrapper td .status-pill,
+  .table-wrapper td .status-badge,
+  .table-wrapper td .status-badge-green,
+  .table-wrapper td .status-verified,
+  .table-wrapper td .status-pending,
+  .table-wrapper td span[class*="status-"],
+  .table-wrapper td span[class*="badge-"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    flex-shrink: 0 !important;
+  }
+
+  .overflow-x-auto td .font-mono,
+  .overflow-x-auto td.font-mono,
+  .overflow-x-auto td button,
+  .overflow-x-auto td a,
+  .table-wrapper td .font-mono,
+  .table-wrapper td.font-mono,
+  .table-wrapper td button,
+  .table-wrapper td a {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    flex-shrink: 0 !important;
   }
 
   /* Floating Competition Demo Mode Panel on Mobile */
@@ -2950,9 +3118,9 @@ div:has(> #login-form) {
     padding: 0.65rem 0.5rem 4rem 0.5rem !important;
   }
 
-  p:not(table *), 
-  span:not(.whitespace-nowrap):not(.alert-dismiss-btn):not(.status-pill):not(.status-badge):not([class*="status-"]):not([class*="badge-"]):not(table *), 
-  div:not(.whitespace-nowrap):not(table *):not(.table-wrapper):not(.overflow-x-auto) {
+  p:not(table *):not(.overflow-x-auto *), 
+  span:not(.whitespace-nowrap):not(.alert-dismiss-btn):not(.status-pill):not(.status-badge):not([class*="status-"]):not([class*="badge-"]):not(table *):not(.overflow-x-auto *), 
+  div:not(.whitespace-nowrap):not(table *):not(.table-wrapper):not(.overflow-x-auto):not(.overflow-x-auto *) {
     word-break: break-word;
     overflow-wrap: break-word;
   }
@@ -2962,7 +3130,7 @@ div:has(> #login-form) {
   }
 }
 
-/* Specific Mobile Text & Table Alignment Protections */
+/* Specific Mobile Text & Action Button Protections */
 .alert-dismiss-btn {
   white-space: nowrap !important;
   flex-shrink: 0 !important;
@@ -2971,64 +3139,6 @@ div:has(> #login-form) {
   overflow-wrap: normal !important;
 }
 
-/* Table Horizontal Scrolling & Layout Container */
-.table-wrapper,
-.overflow-x-auto,
-div:has(> table) {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  box-sizing: border-box !important;
-  position: relative !important;
-}
-
-/* Ensure all tables maintain comfortable min-width on mobile so cells never squeeze character-by-character */
-@media (max-width: 768px) {
-  .table-wrapper table,
-  .overflow-x-auto table,
-  table {
-    min-width: 500px;
-  }
-}
-
-/* Table Cells Formatting & Word Wrap Protections */
-table th,
-table td,
-table th *,
-table td *,
-.table-wrapper table th,
-.table-wrapper table td,
-.overflow-x-auto table th,
-.overflow-x-auto table td {
-  word-break: normal !important;
-  overflow-wrap: normal !important;
-  vertical-align: middle;
-}
-
-table th,
-.table-wrapper table th,
-.overflow-x-auto table th {
-  white-space: nowrap !important;
-}
-
-/* Specific elements inside tables that must stay intact on one line */
-table td .status-pill,
-table td .status-badge,
-table td .status-badge-green,
-table td .status-verified,
-table td .status-pending,
-table td .font-mono,
-table td.font-mono,
-table td .whitespace-nowrap,
-table td.whitespace-nowrap,
-table td span[class*="status-"],
-table td span[class*="badge-"] {
-  white-space: nowrap !important;
-  word-break: normal !important;
-  overflow-wrap: normal !important;
-  display: inline-block;
-}
 
 
 

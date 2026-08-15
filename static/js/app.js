@@ -1593,6 +1593,13 @@ function renderDashboard() {
     }
     
     initPremiumEffects();
+    
+    // Ensure all mobile table scroll containers start cleanly at scrollLeft = 0
+    setTimeout(() => {
+        document.querySelectorAll('.overflow-x-auto, .table-wrapper').forEach(el => {
+            el.scrollLeft = 0;
+        });
+    }, 0);
 }
 
 function renderScenarioNotificationBanner() {
@@ -2219,7 +2226,7 @@ function renderMemberDashboardHTML() {
                             <button onclick="appState.activeTab = 'transactions'; renderApp();" class="text-[9px] font-extrabold text-[#E87545] uppercase hover:underline">Full Passbook →</button>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
+                            <table id="recent-ledger-table" class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-[9px] font-black text-slate-400 uppercase border-b border-slate-200">
                                         <th class="px-3 py-2">Date</th>
@@ -2246,7 +2253,7 @@ function renderMemberDashboardHTML() {
                             <button onclick="appState.activeTab = 'shg'; renderApp();" class="text-[9px] font-extrabold text-[#E87545] uppercase hover:underline">View Directory →</button>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
+                            <table id="group-dues-table" class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-[9px] font-black text-slate-400 uppercase border-b border-slate-200">
                                         <th class="px-3 py-2">Member Name</th>
@@ -2316,7 +2323,7 @@ function renderLeaderDashboardHTML() {
             <div class="space-y-3">
                 <h3 class="font-bold text-sm text-slate-800 tracking-wider uppercase">Member Contribution Board</h3>
                 <div class="overflow-x-auto border border-slate-150 rounded-xl bg-white shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                    <table id="leader-board-table" class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-150">
                                 <th class="px-4 py-2.5">Member Name</th>
@@ -4118,7 +4125,7 @@ function renderMySHGViewHTML() {
             <div class="space-y-3 pt-4 border-t border-slate-100">
                 <h3 class="font-extrabold text-sm text-[#172033] uppercase tracking-wider">Member Payment Status</h3>
                 <div class="overflow-x-auto border border-[#D9E1EC] rounded-xl bg-white shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                    <table id="member-status-table" class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-[#EEF2FF] text-xs font-bold text-[#172033] uppercase border-b border-[#D9E1EC]">
                                 <th class="px-4 py-3">Member Name</th>
@@ -4246,7 +4253,7 @@ function renderMyFinancesViewHTML() {
                     </button>
                 </div>
                 <div class="overflow-x-auto rounded-xl shadow-sm">
-                    <table class="w-full text-left border-collapse">
+                    <table id="finances-history-table" class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-100 dark:bg-slate-900 text-xs font-bold uppercase border-b border-slate-200 dark:border-slate-800">
                                 <th class="px-4 py-3">Date</th>
@@ -4371,7 +4378,7 @@ function renderMyTransactionsViewHTML() {
                 <p class="text-sm text-slate-500 mt-1">Your recent payments and contributions.</p>
             </div>
             <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                <table class="w-full text-left border-collapse">
+                <table id="txn-history-table" class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
                             <th class="px-4 py-3">Date</th>

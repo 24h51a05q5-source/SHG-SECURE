@@ -1253,35 +1253,63 @@ function renderHeader() {
     const role = u.role || 'MEMBER';
     
     headerDiv.innerHTML = `
-        <div class="max-w-7xl mx-auto px-4 py-2.5 flex justify-between items-center gap-3 select-none">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="appState.activeTab = 'dashboard'; renderApp();">
-                <div class="bg-[#18233A] text-[#FAFAF7] p-2 rounded-xl font-bold text-lg flex items-center justify-center shadow-sm">🛡️</div>
-                <div>
-                    <span class="font-extrabold text-base leading-tight tracking-tight text-[#18233A] block">SHG-SECURE</span>
-                    <span class="text-[10px] font-bold text-[#5B6472] block uppercase tracking-wider">${groupName}</span>
+        <div class="max-w-7xl mx-auto px-2.5 sm:px-4 py-2.5 flex justify-between items-center gap-2 sm:gap-3 select-none box-border">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <button id="mobile-sidebar-toggle" onclick="toggleMobileSidebar();" class="mobile-menu-btn p-1.5 sm:p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-800/70 text-[#18233A] dark:text-white items-center justify-center font-bold text-sm sm:text-base shadow-sm transition hover:bg-slate-100 shrink-0" title="Toggle Navigation Menu">
+                    ☰
+                </button>
+                <div class="flex items-center gap-2 sm:gap-3 cursor-pointer min-w-0" onclick="appState.activeTab = 'dashboard'; closeMobileSidebar(); renderApp();">
+                    <div class="bg-[#18233A] text-[#FAFAF7] p-1.5 sm:p-2 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center shadow-sm shrink-0">🛡️</div>
+                    <div class="min-w-0">
+                        <span class="font-extrabold text-sm sm:text-base leading-tight tracking-tight text-[#18233A] block truncate">SHG-SECURE</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold text-[#5B6472] block uppercase tracking-wider truncate max-w-[100px] sm:max-w-[180px]">${groupName}</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="toggleTheme();" class="theme-toggle-btn px-2.5 py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-extrabold shadow-sm transition" title="Toggle Light / Dark Mode">
-                    <span>${currentTheme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}</span>
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <button onclick="toggleTheme();" class="theme-toggle-btn px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border flex items-center gap-1 text-[11px] sm:text-xs font-extrabold shadow-sm transition" title="Toggle Light / Dark Mode">
+                    <span>${currentTheme === 'dark' ? '🌙' : '☀️'}</span>
+                    <span class="hidden sm:inline">${currentTheme === 'dark' ? ' Dark Mode' : ' Light Mode'}</span>
                 </button>
 
-                <div class="text-right header-user-info">
-                    <div class="text-xs font-black text-[#18233A]">${name}</div>
+                <div class="text-right header-user-info hidden sm:block">
+                    <div class="text-xs font-black text-[#18233A] truncate max-w-[120px] md:max-w-[180px]">${name}</div>
                     <div class="text-[10px] text-[#5B6472] font-mono font-bold">ID: ${memberId}</div>
                 </div>
                 
-                <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border ${roleColors[role] || roleColors['MEMBER']}">
+                <span class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase border shrink-0 ${roleColors[role] || roleColors['MEMBER']}">
                     ${role}
                 </span>
 
-                <button onclick="handleLogout();" class="bg-[#FAFAF7] hover:bg-[#ECE9E1] text-[#18233A] font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm border border-[#E4E0D7]">
+                <button onclick="handleLogout();" class="bg-[#FAFAF7] hover:bg-[#ECE9E1] text-[#18233A] font-bold text-[10px] sm:text-xs px-2.5 sm:px-3.5 py-1 sm:py-2 rounded-xl transition shadow-sm border border-[#E4E0D7] shrink-0">
                     Sign Out
                 </button>
             </div>
         </div>
     `;
+}
+
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar-panel');
+    const backdrop = document.getElementById('mobile-sidebar-backdrop');
+    if (sidebar) {
+        sidebar.classList.toggle('mobile-open');
+    }
+    if (backdrop) {
+        backdrop.classList.toggle('hidden');
+    }
+}
+
+function closeMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar-panel');
+    const backdrop = document.getElementById('mobile-sidebar-backdrop');
+    if (sidebar) {
+        sidebar.classList.remove('mobile-open');
+    }
+    if (backdrop) {
+        backdrop.classList.add('hidden');
+    }
 }
 
 
@@ -1482,6 +1510,8 @@ function renderDashboard() {
     // Layout: 2-Column Shell
     dashboard.innerHTML = `
         <div class="dashboard-shell relative">
+            <!-- Backdrop for mobile sidebar drawer -->
+            <div id="mobile-sidebar-backdrop" class="mobile-backdrop hidden" onclick="closeMobileSidebar();"></div>
             <!-- COLUMN 1: Left Sidebar Panel -->
             <div class="sidebar-panel select-none">
                 <div class="px-2 py-2 mb-2 border-b border-slate-700/40 text-center md:text-left">
@@ -3676,9 +3706,9 @@ function renderSidebarNavigationItemsHTML() {
         
         let clickHandler = '';
         if (item.id === 'group_chat') {
-            clickHandler = `appState.unreadChatCount = 0; appState.activeTab = 'group_chat'; window.history.pushState(null, '', '${path}'); renderApp();`;
+            clickHandler = `appState.unreadChatCount = 0; appState.activeTab = 'group_chat'; window.history.pushState(null, '', '${path}'); closeMobileSidebar(); renderApp();`;
         } else {
-            clickHandler = `appState.activeTab = '${item.id}'; window.history.pushState(null, '', '${path}'); renderApp();`;
+            clickHandler = `appState.activeTab = '${item.id}'; window.history.pushState(null, '', '${path}'); closeMobileSidebar(); renderApp();`;
         }
         
         let unreadBadge = '';
@@ -4322,31 +4352,31 @@ function renderMyTransactionsViewHTML() {
         { date: '15 Jun 2026', id: 'TXN-003', amount: '₹1,000', status: '✓ Verified', color: 'text-green-600' }
     ].map(t => `
         <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-            <td class="px-4 py-3 text-sm font-bold text-slate-800">${t.date}</td>
-            <td class="px-4 py-3 text-xs font-mono text-slate-500">${t.id}</td>
-            <td class="px-4 py-3 text-sm font-bold text-slate-800">${t.amount}</td>
-            <td class="px-4 py-3 text-xs font-bold ${t.color}">${t.status}</td>
-            <td class="px-4 py-3 text-right">
-                <button onclick="showToast('Receipt downloaded', 'success')" class="text-xs text-[#2563EB] hover:underline font-bold">Download Receipt</button>
+            <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 whitespace-nowrap">${t.date}</td>
+            <td class="px-3 sm:px-4 py-3 text-xs font-mono text-slate-500 whitespace-nowrap">${t.id}</td>
+            <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 whitespace-nowrap">${t.amount}</td>
+            <td class="px-3 sm:px-4 py-3 text-xs font-bold whitespace-nowrap ${t.color}">${t.status}</td>
+            <td class="px-3 sm:px-4 py-3 text-right whitespace-nowrap">
+                <button onclick="showToast('Receipt downloaded', 'success')" class="text-xs text-[#2563EB] hover:underline font-bold whitespace-nowrap">Download Receipt</button>
             </td>
         </tr>
     `).join('');
 
     return `
-        <div class="bg-white p-6 rounded-xl border border-slate-200 space-y-6 shadow-sm">
+        <div class="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 space-y-6 shadow-sm fintech-card">
             <div class="border-b border-slate-100 pb-4">
                 <h2 class="font-black text-2xl text-slate-800">Transaction History</h2>
                 <p class="text-sm text-slate-500 mt-1">Your recent payments and contributions.</p>
             </div>
-            <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                <table class="w-full text-left border-collapse">
+            <div class="table-wrapper overflow-x-auto border border-slate-200 rounded-xl">
+                <table class="w-full text-left border-collapse min-w-[500px]">
                     <thead>
                         <tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
-                            <th class="px-4 py-3">Date</th>
-                            <th class="px-4 py-3">Transaction ID</th>
-                            <th class="px-4 py-3">Amount</th>
-                            <th class="px-4 py-3">Status</th>
-                            <th class="px-4 py-3 text-right">Action</th>
+                            <th class="px-3 sm:px-4 py-3 whitespace-nowrap">Date</th>
+                            <th class="px-3 sm:px-4 py-3 whitespace-nowrap">Transaction ID</th>
+                            <th class="px-3 sm:px-4 py-3 whitespace-nowrap">Amount</th>
+                            <th class="px-3 sm:px-4 py-3 whitespace-nowrap">Status</th>
+                            <th class="px-3 sm:px-4 py-3 text-right whitespace-nowrap">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -4789,19 +4819,19 @@ function renderMyAlertsViewHTML() {
                 `;
             } else if (alert.type === 'PAYMENT_VERIFIED') {
                 return `
-                    <div class="p-4 bg-green-50 border border-green-200 rounded-xl flex justify-between items-center">
-                        <div>
+                    <div class="p-4 bg-green-50 border border-green-200 rounded-xl flex justify-between items-center gap-3">
+                        <div class="min-w-0 flex-1">
                             <span class="alert-title text-green-800 font-bold text-sm block">Payment Verified</span>
-                            <span class="alert-message text-green-700 text-xs block">${alert.description}</span>
+                            <span class="alert-message text-green-700 text-xs block mt-0.5">${alert.description}</span>
                             <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">${alert.date}</span>
                         </div>
-                        <button onclick="dismissAlert('${alert.id}');" class="alert-dismiss-btn text-xs font-bold text-green-700 hover:underline cursor-pointer">Dismiss</button>
+                        <button onclick="dismissAlert('${alert.id}');" class="alert-dismiss-btn text-xs font-bold text-green-700 hover:underline cursor-pointer shrink-0 whitespace-nowrap ml-2">Dismiss</button>
                     </div>
                 `;
             } else {
                 return `
-                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex justify-between items-center">
-                        <div>
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex justify-between items-center gap-3">
+                        <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <span class="alert-title text-amber-800 font-bold text-sm block">${alert.title}</span>
                                 <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 border border-amber-300">${alert.severityBadge}</span>
@@ -4809,7 +4839,7 @@ function renderMyAlertsViewHTML() {
                             <span class="alert-message text-amber-900 text-xs block mt-1">${alert.description}</span>
                             <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">${alert.date}</span>
                         </div>
-                        <button onclick="dismissAlert('${alert.id}');" class="alert-dismiss-btn text-xs font-bold text-amber-800 hover:underline cursor-pointer">Dismiss</button>
+                        <button onclick="dismissAlert('${alert.id}');" class="alert-dismiss-btn text-xs font-bold text-amber-800 hover:underline cursor-pointer shrink-0 whitespace-nowrap ml-2">Dismiss</button>
                     </div>
                 `;
             }
@@ -4818,12 +4848,12 @@ function renderMyAlertsViewHTML() {
 
     return `
         <div class="bg-white p-6 rounded-xl border border-slate-200 space-y-6 shadow-sm fintech-card">
-            <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
-                <div>
+            <div class="border-b border-slate-100 pb-4 flex justify-between items-start gap-3">
+                <div class="min-w-0 flex-1">
                     <h2 class="font-black text-2xl text-slate-800">My Alerts</h2>
                     <p class="text-sm text-slate-500 mt-1">Notifications about your group, transactions, and security flags.</p>
                 </div>
-                <button onclick="clearAllAlerts();" class="text-xs text-slate-500 hover:text-slate-800 font-bold underline">Clear All</button>
+                <button onclick="clearAllAlerts();" class="text-xs text-slate-500 hover:text-slate-800 font-bold underline shrink-0 whitespace-nowrap pt-1">Clear All</button>
             </div>
             <div class="space-y-3">
                 ${alertsListHTML}
